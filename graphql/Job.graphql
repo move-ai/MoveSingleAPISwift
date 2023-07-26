@@ -1,0 +1,19 @@
+mutation CreateJob($takeId: String!) {
+    job: createJob(takeId: $takeId) {
+        id
+        state
+    }
+}
+
+query Job($jobId: ID!) {
+    job: getJob(jobId: $jobId) {
+        state
+        outputs {
+            key
+            file {
+                id
+                presignedUrl
+            }
+        }
+    }
+}

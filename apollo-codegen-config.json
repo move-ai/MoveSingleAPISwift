@@ -1,0 +1,49 @@
+{
+  "schemaNamespace" : "MoveSingleGraphQL",
+  "input" : {
+    "operationSearchPaths" : [
+      "**/*.graphql"
+    ],
+    "schemaSearchPaths" : [
+      "**/*.graphqls"
+    ]
+  },
+  "output" : {
+    "testMocks" : {
+        "absolute": {
+            "path" : "./Tests/MoveSingleAPISwiftTests/GraphQLMocks/",
+            "accessModifier": "internal"
+        }
+    },
+    "schemaTypes": {
+        "moduleType": {
+            "embeddedInTarget": {
+                "name": "MoveSingleAPISwift",
+                "accessModifier": "internal"
+            }
+        },
+        "path": "./Sources/MoveSingleAPISwift/GraphQL/generated/"
+    },
+    "operations" : {
+      "inSchemaModule" : {
+      }
+    }
+  },
+  "schemaDownloadConfiguration": {
+      "downloadMethod": {
+          "introspection": {
+              "endpointURL": "https://api.move.ai/ugc/graphql",
+              "httpMethod": {
+                  "POST": {}
+              },
+              "includeDeprecatedInputValues": false,
+              "outputFormat": "SDL"
+          }
+      },
+      "downloadTimeout": 60,
+      "headers": {
+          "Authorization": ""
+      },
+      "outputPath": "./graphql/schema.graphqls"
+  }
+}

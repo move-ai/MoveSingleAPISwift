@@ -1,0 +1,15 @@
+mutation CreateFile($type: String!) {
+    file: createFile(type: $type) {
+        id
+        presignedUrl
+    }
+}
+
+query File($fileId: ID!) {
+    file: getFile(fileId: $fileId) {
+        id
+        presignedUrl
+    }
+}
+
+

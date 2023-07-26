@@ -1,0 +1,33 @@
+{
+  "configurations" : [
+    {
+      "id" : "4A573D7B-C408-45F9-BEAB-45AF6E396D8B",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:",
+          "identifier" : "MoveSingleAPISwift",
+          "name" : "MoveSingleAPISwift"
+        }
+      ]
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "MoveSingleAPISwiftTests",
+        "name" : "MoveSingleAPISwiftTests"
+      }
+    }
+  ],
+  "version" : 1
+}
