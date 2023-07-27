@@ -13,7 +13,7 @@ enum GraphQLClientError: Error {
     case noDataFound
 }
 
-enum GraphQLEnvironment {
+public enum GraphQLEnvironment {
     case green
     case production
 
@@ -27,12 +27,21 @@ enum GraphQLEnvironment {
     }
 }
 
-final class GraphQLClient {
+protocol GraphQLClient {
+    func createFile(type: String) async throws -> CreateFileMutation.Data.File
+    func getFile(id: String) async throws -> FileQuery.Data.File
+    func createTake(videoFileId: String, moveFileId: String) async throws -> CreateTakeMutation.Data.Take
+    func getTake(id: String) async throws -> TakeQuery.Data.Take
+    func createJob(takeId: String) async throws -> CreateJobMutation.Data.Job
+    func getJob(id: String) async throws -> JobQuery.Data.Job
+}
+
+final class GraphQLClientImpl: GraphQLClient {
 
     private let apiKey: String
     private let environment: GraphQLEnvironment
 
-    private(set) lazy var apollo: ApolloClient = {
+    private lazy var apollo: ApolloClient = {
         let client = URLSessionClient()
         let cache = InMemoryNormalizedCache()
         let store = ApolloStore(cache: cache)
@@ -46,9 +55,9 @@ final class GraphQLClient {
         self.environment = environment
     }
 
-    func createFile(type: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File {
+    func createFile(type: String) async throws -> CreateFileMutation.Data.File {
         return try await withCheckedThrowingContinuation { continuation in
-            apollo.perform(mutation: MoveSingleGraphQL.CreateFileMutation(type: type)) { result in
+            apollo.perform(mutation: CreateFileMutation(type: type)) { result in
                 switch result {
                 case .success(let result):
                     if let file = result.data?.file {
@@ -65,9 +74,9 @@ final class GraphQLClient {
         }
     }
 
-    func getFile(id: String) async throws -> MoveSingleGraphQL.FileQuery.Data.File {
+    func getFile(id: String) async throws -> FileQuery.Data.File {
         return try await withCheckedThrowingContinuation { continuation in
-            apollo.fetch(query: MoveSingleGraphQL.FileQuery(fileId: id)) { result in
+            apollo.fetch(query: FileQuery(fileId: id)) { result in
                 switch result {
                 case .success(let result):
                     if let file = result.data?.file {
@@ -84,9 +93,9 @@ final class GraphQLClient {
         }
     }
 
-    func createTake(videoFileId: String, moveFileId: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take {
+    func createTake(videoFileId: String, moveFileId: String) async throws -> CreateTakeMutation.Data.Take {
         return try await withCheckedThrowingContinuation { continuation in
-            apollo.perform(mutation: MoveSingleGraphQL.CreateTakeMutation(videoFileId: videoFileId, moveFileId: moveFileId)) { result in
+            apollo.perform(mutation: CreateTakeMutation(videoFileId: videoFileId, moveFileId: moveFileId)) { result in
                 switch result {
                 case .success(let result):
                     if let take = result.data?.take {
@@ -103,9 +112,9 @@ final class GraphQLClient {
         }
     }
 
-    func getTake(id: String) async throws -> MoveSingleGraphQL.TakeQuery.Data.Take {
+    func getTake(id: String) async throws -> TakeQuery.Data.Take {
         return try await withCheckedThrowingContinuation { continuation in
-            apollo.fetch(query: MoveSingleGraphQL.TakeQuery(takeId: id)) { result in
+            apollo.fetch(query: TakeQuery(takeId: id)) { result in
                 switch result {
                 case .success(let result):
                     if let take = result.data?.take {
@@ -122,9 +131,9 @@ final class GraphQLClient {
         }
     }
 
-    func createJob(takeId: String) async throws -> MoveSingleGraphQL.CreateJobMutation.Data.Job {
+    func createJob(takeId: String) async throws -> CreateJobMutation.Data.Job {
         return try await withCheckedThrowingContinuation { continuation in
-            apollo.perform(mutation: MoveSingleGraphQL.CreateJobMutation(takeId: takeId)) { result in
+            apollo.perform(mutation: CreateJobMutation(takeId: takeId)) { result in
                 switch result {
                 case .success(let result):
                     if let job = result.data?.job {
@@ -141,9 +150,9 @@ final class GraphQLClient {
         }
     }
 
-    func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job {
+    func getJob(id: String) async throws -> JobQuery.Data.Job {
         return try await withCheckedThrowingContinuation { continuation in
-            apollo.fetch(query: MoveSingleGraphQL.JobQuery(jobId: id)) { result in
+            apollo.fetch(query: JobQuery(jobId: id)) { result in
                 switch result {
                 case .success(let result):
                     if let job = result.data?.job {
