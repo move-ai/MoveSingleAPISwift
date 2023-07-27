@@ -1,5 +1,5 @@
 {
-  "schemaNamespace" : "GraphQL",
+  "schemaNamespace" : "MoveSingleGraphQL",
   "input" : {
     "operationSearchPaths" : [
       "**/*.graphql"
@@ -10,17 +10,15 @@
   },
   "output" : {
     "testMocks" : {
-      "none" : {
-      }
+        "swiftPackage" : {
+            "targetName" : "MoveSingleGraphQLTestMocks"
+        }
     },
     "schemaTypes": {
         "moduleType": {
-            "embeddedInTarget": {
-                "name": "MoveSingleAPISwift",
-                "accessModifier": "internal"
-            }
+            "swiftPackageManager": {}
         },
-        "path": "./Sources/MoveSingleAPISwift/GraphQL/generated/schema/"
+        "path": "./MoveSingleGraphQL/"
     },
     "operations" : {
       "inSchemaModule" : {
