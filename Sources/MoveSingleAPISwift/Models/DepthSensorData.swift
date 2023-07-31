@@ -7,6 +7,6 @@
 
 import AVFoundation
 
-struct DepthSensorData {
+public struct DepthSensorData {
     let depthData: AVDepthData
 }

@@ -7,7 +7,7 @@
 
 import CoreMotion
 
-struct CameraPositionData {
+public struct CameraPositionData {
     let gyroData: CMGyroData
     let accelerometerData: CMAccelerometerData
     let magnetometerData: CMMagnetometerData

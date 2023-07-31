@@ -11,7 +11,7 @@ enum TakeError: Error {
     case filesNotUploaded
 }
 
-actor Take {
+public actor Take {
     @Dependency private var graphQLClient: GraphQLClient
 
     var id: String = UUID().uuidString // This ID will change when we create a take as we then use the remote takeID

@@ -7,11 +7,13 @@ public struct MoveSingleAPISwift {
         DependencyContainer.register(URLSessionClientImpl() as URLSessionClient)
     }
 
-    public func createTake() {
+    public func createTake(frames: [Frame]) -> Take {
+        // TODO: Generate Files from Frames
 
         let videoFile = File(type: .video)
         let moveFile = File(type: .move)
         let take = Take(videoFile: videoFile, moveFile: moveFile)
+        return take
 
     }
 }

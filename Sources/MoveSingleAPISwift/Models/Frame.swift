@@ -7,7 +7,7 @@
 
 import AVFoundation
 
-struct Frame {
+public struct Frame {
     let sampleBuffer: CMSampleBuffer // native iOS SampleBuffer Object
     let enhancementData: EnhancementData
 }
