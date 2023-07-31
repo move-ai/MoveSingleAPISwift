@@ -1,0 +1,19 @@
+mutation CreateTake($videoFileId: String!, $moveFileId: String!) {
+    take: createTake(
+        videoFileId: $videoFileId
+        additionalFileIds: [
+            {
+                key: MOVE,
+                fileId: $moveFileId
+            }
+        ]
+    ) {
+        id
+    }
+}
+
+query Take($takeId: ID!) {
+    take: getTake(takeId: $takeId) {
+        id
+    }
+}
