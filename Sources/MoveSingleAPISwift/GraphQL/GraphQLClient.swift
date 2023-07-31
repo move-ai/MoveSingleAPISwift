@@ -42,7 +42,7 @@ final class GraphQLClientImpl: GraphQLClient {
     private let environment: GraphQLEnvironment
 
     private lazy var apollo: ApolloClient = {
-        let client = URLSessionClient()
+        let client = Apollo.URLSessionClient()
         let cache = InMemoryNormalizedCache()
         let store = ApolloStore(cache: cache)
         let provider = NetworkInterceptorProvider(apiKey: apiKey, client: client, store: store)
