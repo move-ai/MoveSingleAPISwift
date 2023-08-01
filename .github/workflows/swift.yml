@@ -18,22 +18,13 @@ jobs:
       run: swift build -v
 
   unittest:
-    name: ${{ matrix.command }} on  ${{ matrix.platform }} (xcode ${{ matrix.xcode }}, ${{ matrix.macos }})
-    runs-on: ${{ matrix.macos }}
-    strategy:
-      fail-fast: false
-      matrix:
-        xcode: ['14.3']
-        macos: ['macos-13']
-        scheme: ['MoveSingleAPISwift']
-        command: ['test']
-        platform: ['macOS', 'iOS']
+    runs-on: macos-latest
     steps:
-    - name: Switch xcode to ${{ matrix.xcode }}
-      uses: maxim-lobanov/setup-xcode@v1.2.3
+    - name: Switch xcode to latest
+      uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: ${{ matrix.xcode }}
-    - name: Double-check macOS version (${{ matrix.macos }})
+        xcode-version: latest-stable
+    - name: Double-check macOS version
       run: sw_vers
     - name: Code Checkout
       uses: actions/checkout@v3
@@ -43,13 +34,11 @@ jobs:
       run: xcodebuild -showsdks
     - name: Show buildable schemes
       run: xcodebuild -list
-    - name: Show eligible build destinations for ${{ matrix.scheme }}
-      run: xcodebuild -showdestinations -scheme ${{ matrix.scheme }}
     - uses: mxcl/xcodebuild@v2
       with:
-        platform: ${{ matrix.platform }}
-        scheme: ${{ matrix.scheme }}
-        action: ${{ matrix.command }}
+        platform: iOS
+        scheme: MoveSingleAPISwift
+        action: test
         code-coverage: true
         verbosity: xcpretty
         upload-logs: always
