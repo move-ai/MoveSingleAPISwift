@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "MoveSingleAPISwift",
-    platforms: [.iOS(.v16), .macOS(.v10_15)],
+    platforms: [.iOS(.v16), .macOS(.v13)],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
@@ -27,7 +27,6 @@ let package = Package(
             name: "MoveSingleAPISwift",
             dependencies: [
                 .product(name: "Apollo", package: "apollo-ios"),
-                .product(name: "ApolloTestSupport", package: "apollo-ios"),
                 .product(name: "MoveSingleGraphQL", package: "MoveSingleGraphQL")
             ]
         ),
@@ -35,7 +34,8 @@ let package = Package(
             name: "MoveSingleAPISwiftTests",
             dependencies: [
                 "MoveSingleAPISwift",
-                .product(name: "MoveSingleGraphQLTestMocks", package: "MoveSingleGraphQL")
+                .product(name: "MoveSingleGraphQLTestMocks", package: "MoveSingleGraphQL"),
+                .product(name: "ApolloTestSupport", package: "apollo-ios")
             ]
         )
     ]

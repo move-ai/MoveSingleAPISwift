@@ -39,7 +39,7 @@ class NetworkInterceptorProvider: DefaultInterceptorProvider {
 
     private let apiKey: String
 
-    init(apiKey: String, client: URLSessionClient, store: ApolloStore) {
+    init(apiKey: String, client: Apollo.URLSessionClient, store: ApolloStore) {
         self.apiKey = apiKey
         super.init(client: client, store: store)
     }

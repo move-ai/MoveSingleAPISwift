@@ -20,6 +20,25 @@ jobs:
   unittest:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Run tests
-      run: swift test -v
+    - name: Switch xcode to latest
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+    - name: Double-check macOS version
+      run: sw_vers
+    - name: Code Checkout
+      uses: actions/checkout@v3
+    - name: Check xcodebuild version
+      run: xcodebuild -version
+    - name: Check xcode embedded SDKs
+      run: xcodebuild -showsdks
+    - name: Show buildable schemes
+      run: xcodebuild -list
+    - uses: mxcl/xcodebuild@v2
+      with:
+        platform: iOS
+        scheme: MoveSingleAPISwift
+        action: test
+        code-coverage: true
+        verbosity: xcpretty
+        upload-logs: always
