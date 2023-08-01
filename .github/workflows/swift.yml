@@ -4,24 +4,20 @@
 name: Swift
 
 on:
-  push:
+    push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    pull_request:
+        branches: [ "main" ]
 
 jobs:
-  pre-commit:
+    pre-commit:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
     - name: Build
-      run: swift build -v
+        run: swift build -v
 
-  unittest:
+    unittest:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Build for iOS
-      run: set -o pipefail && env NSUnbufferedIO=YES xcodebuild build-for-testing -scheme MoveSingleAPISwift -destination "platform=iOS Simulator,OS=latest,name=iPhone 14" | xcpretty
-    - name: Run iOS tests
-      run: set -o pipefail && env NSUnbufferedIO=YES xcodebuild test-without-building -scheme MoveSingleAPISwift -destination "platform=iOS Simulator,OS=latest,name=iPhone 14" | xcpretty
+        - uses: mxcl/xcodebuild@v2
