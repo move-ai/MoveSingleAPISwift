@@ -11,14 +11,14 @@ import XCTest
 final class ProtobufGeneratorIntrinsicsTests: XCTestCase {
 
     func testIntrinsics() {
-        let instrinsics = ProtobufGenerator.intrinsic(from: .mock)
-        XCTAssertEqual(instrinsics.centerPointX, 7)
-        XCTAssertEqual(instrinsics.centerPointY, 8)
-        XCTAssertEqual(instrinsics.focalLengthX, 1)
-        XCTAssertEqual(instrinsics.focalLengthY, 5)
-        XCTAssertEqual(instrinsics.skew, 2)
-        XCTAssertEqual(instrinsics.resolution.width, 100)
-        XCTAssertEqual(instrinsics.resolution.height, 100)
+        let intrinsics = ProtobufGenerator.intrinsic(from: .mock)
+        XCTAssertEqual(intrinsics.centerPointX, 7)
+        XCTAssertEqual(intrinsics.centerPointY, 8)
+        XCTAssertEqual(intrinsics.focalLengthX, 1)
+        XCTAssertEqual(intrinsics.focalLengthY, 5)
+        XCTAssertEqual(intrinsics.skew, 2)
+        XCTAssertEqual(intrinsics.resolution.width, 100)
+        XCTAssertEqual(intrinsics.resolution.height, 100)
     }
 
 }

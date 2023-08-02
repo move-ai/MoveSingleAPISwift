@@ -73,8 +73,8 @@ final class ProtobufGenerator {
         var camera = Camera()
         camera.name = config.camera.pbCameraName
         camera.intrinsics = intrinsic(from: frame.sampleBuffer)
-        if let calibrationData = frame.enhancementData.depthSensorData?.depthData.cameraCalibrationData {
-            camera.extrinsics = extrinsics(from: calibrationData)
+        if let extrinsicMatrix = frame.enhancementData.depthSensorData?.depthData.cameraCalibrationData?.extrinsicMatrix {
+            camera.extrinsics = extrinsics(from: extrinsicMatrix)
         }
         return camera
     }
@@ -109,9 +109,7 @@ final class ProtobufGenerator {
         return intrinsics
     }
 
-    static func extrinsics(from calibrationData: AVCameraCalibrationData) -> CoordinateSystem {
-        let extrinsicMatrix = calibrationData.extrinsicMatrix
-
+    static func extrinsics(from extrinsicMatrix: matrix_float4x3) -> CoordinateSystem {
         var extrinsics = CoordinateSystem()
         // Translation
         extrinsics.transform = Transform()
