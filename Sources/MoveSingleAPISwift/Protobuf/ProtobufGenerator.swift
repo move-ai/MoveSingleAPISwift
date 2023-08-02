@@ -48,8 +48,8 @@ final class ProtobufGenerator {
             frames.forEach { frame in
                 var odometryInstance = OdometryInstance()
 
-                if let calibrationData = frame.enhancementData.depthSensorData?.depthData.cameraCalibrationData {
-                    odometryInstance.coordinateSystem.transform = transform(from: calibrationData)
+                if let extrinsicMatrix = frame.enhancementData.depthSensorData?.depthData.cameraCalibrationData?.extrinsicMatrix {
+                    odometryInstance.coordinateSystem.transform = transform(from: extrinsicMatrix)
                 }
 
                 if config.includeIMUData, let cameraPositionData = frame.enhancementData.cameraPositionData {
@@ -138,11 +138,11 @@ final class ProtobufGenerator {
         return extrinsics
     }
 
-    static func transform(from calibrationData: AVCameraCalibrationData) -> Transform {
+    static func transform(from extrinsicMatrix: matrix_float4x3) -> Transform {
         var trace: Float = 0.0
         var quat: vector_float4 = vector_float4()
 
-        let mat = calibrationData.extrinsicMatrix
+        let mat = extrinsicMatrix
 
         if mat[2][2] < 0 {
             if mat[0][0] > mat[1][1] {
