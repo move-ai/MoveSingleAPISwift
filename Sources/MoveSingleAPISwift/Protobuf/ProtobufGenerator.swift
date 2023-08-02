@@ -69,7 +69,7 @@ final class ProtobufGenerator {
         }.value
     }
 
-    private static func camera(from frame: Frame, config: Configuration) throws -> Camera {
+    static func camera(from frame: Frame, config: Configuration) throws -> Camera {
         var camera = Camera()
         camera.name = config.camera.pbCameraName
         camera.intrinsics = intrinsic(from: frame.sampleBuffer)
@@ -79,7 +79,7 @@ final class ProtobufGenerator {
         return camera
     }
 
-    private static func intrinsic(from sampleBuffer: CMSampleBuffer) -> Camera.Intrinsics {
+    static func intrinsic(from sampleBuffer: CMSampleBuffer) -> Camera.Intrinsics {
         var height: Int = 0
         var width: Int = 0
         if let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
@@ -109,7 +109,7 @@ final class ProtobufGenerator {
         return intrinsics
     }
 
-    private static func extrinsics(from calibrationData: AVCameraCalibrationData) -> CoordinateSystem {
+    static func extrinsics(from calibrationData: AVCameraCalibrationData) -> CoordinateSystem {
         let extrinsicMatrix = calibrationData.extrinsicMatrix
 
         var extrinsics = CoordinateSystem()
@@ -140,7 +140,7 @@ final class ProtobufGenerator {
         return extrinsics
     }
 
-    private static func transform(from calibrationData: AVCameraCalibrationData) -> Transform {
+    static func transform(from calibrationData: AVCameraCalibrationData) -> Transform {
         var trace: Float = 0.0
         var quat: vector_float4 = vector_float4()
 
@@ -180,7 +180,7 @@ final class ProtobufGenerator {
         return transform
     }
 
-    private static func imu(from cameraPositionData: CameraPositionData, config: Configuration) -> IMU {
+    static func imu(from cameraPositionData: CameraPositionData, config: Configuration) -> IMU {
 
         let accVector = config.useDeviceMotionUserAcceleration ? cameraPositionData.deviceMotion.userAcceleration : cameraPositionData.accelerometerData.acceleration //cameraData.deviceMotionUserAccelerationVector : cameraData.accelorometerVector
 
@@ -202,7 +202,7 @@ final class ProtobufGenerator {
 
     }
 
-    private static func depthMap(from depthData: AVDepthData) -> DepthMap {
+    static func depthMap(from depthData: AVDepthData) -> DepthMap {
         let height = CVPixelBufferGetHeight(depthData.depthDataMap)
         let width = CVPixelBufferGetWidth(depthData.depthDataMap)
 
@@ -235,7 +235,7 @@ final class ProtobufGenerator {
         return depthMap
     }
 
-    private static func convert(buffer: CVPixelBuffer) -> [Float32] {
+    static func convert(buffer: CVPixelBuffer) -> [Float32] {
         guard let baseAddress = getBaseAddress(for: buffer) else { return [] }
         let sourceDataSize = CVPixelBufferGetDataSize(buffer)
         let width = CVPixelBufferGetWidth(buffer)
@@ -249,7 +249,7 @@ final class ProtobufGenerator {
         return array
     }
 
-    private static func getBaseAddress(for buffer: CVPixelBuffer) -> UnsafeMutableRawPointer? {
+    static func getBaseAddress(for buffer: CVPixelBuffer) -> UnsafeMutableRawPointer? {
         CVPixelBufferLockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0))
         let baseAddress: UnsafeMutableRawPointer? = CVPixelBufferGetBaseAddress(buffer)
         CVPixelBufferUnlockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0))
