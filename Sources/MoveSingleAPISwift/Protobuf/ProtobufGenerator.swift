@@ -7,6 +7,7 @@
 
 import Foundation
 import AVFoundation
+import CoreMotion
 
 final class ProtobufGenerator {
 
@@ -15,6 +16,7 @@ final class ProtobufGenerator {
         let includeIMUData: Bool
         let includeLidarData: Bool
         let useDeviceMotionUserAcceleration: Bool
+        let useDeviceMotionRotationRate: Bool
 
         enum Camera: String, CaseIterable, Identifiable, CustomStringConvertible, Equatable, Codable {
             case front = "Front"
@@ -180,21 +182,26 @@ final class ProtobufGenerator {
 
     static func imu(from cameraPositionData: CameraPositionData, config: Configuration) -> IMU {
 
-        let accVector = config.useDeviceMotionUserAcceleration ? cameraPositionData.deviceMotion.userAcceleration : cameraPositionData.accelerometerData.acceleration //cameraData.deviceMotionUserAccelerationVector : cameraData.accelorometerVector
+        let accVector = config.useDeviceMotionUserAcceleration ? cameraPositionData.deviceMotion.userAcceleration : cameraPositionData.accelerometerData.acceleration
+        let gyrVector = config.useDeviceMotionRotationRate ? CMRotationRate(
+            x: cameraPositionData.deviceMotion.attitude.pitch,
+            y: cameraPositionData.deviceMotion.attitude.roll,
+            z: cameraPositionData.deviceMotion.attitude.yaw
+        ) : cameraPositionData.gyroData.rotationRate
 
         var imu = IMU()
-        imu.gyrX = Float(cameraPositionData.deviceMotion.attitude.pitch) // x
-        imu.gyrY = Float(cameraPositionData.deviceMotion.attitude.roll) // y
-        imu.gyrZ = Float(cameraPositionData.deviceMotion.attitude.yaw) // z
+        imu.gyrX = Float(gyrVector.x)
+        imu.gyrY = Float(gyrVector.y)
+        imu.gyrZ = Float(gyrVector.z)
         imu.accX = Float(accVector.x)
         imu.accY = Float(accVector.y)
         imu.accZ = Float(accVector.z)
         imu.magX = Float(cameraPositionData.magnetometerData.magneticField.x)
         imu.magY = Float(cameraPositionData.magnetometerData.magneticField.y)
         imu.magZ = Float(cameraPositionData.magnetometerData.magneticField.z)
-        imu.grvX = Float(cameraPositionData.gyroData.rotationRate.x)
-        imu.grvY = Float(cameraPositionData.gyroData.rotationRate.y)
-        imu.grvZ = Float(cameraPositionData.gyroData.rotationRate.z)
+        imu.grvX = Float(cameraPositionData.deviceMotion.gravity.x)
+        imu.grvY = Float(cameraPositionData.deviceMotion.gravity.y)
+        imu.grvZ = Float(cameraPositionData.deviceMotion.gravity.z)
 
         return imu
 
