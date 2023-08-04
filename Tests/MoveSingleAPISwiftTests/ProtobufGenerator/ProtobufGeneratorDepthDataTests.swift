@@ -9,9 +9,9 @@ import XCTest
 @testable import MoveSingleAPISwift
 
 final class ProtobufGeneratorDepthDataTests: XCTestCase {
-	func testDepthData() {
-		let depthMap = ProtobufGenerator.depthMap(from: .mock)
-		XCTAssertEqual(depthMap.width, 100)
-		XCTAssertEqual(depthMap.height, 100)
-	}
+    func testDepthData() {
+        let depthMap = ProtobufGenerator.depthMap(from: .mock)
+        XCTAssertEqual(depthMap.width, 100)
+        XCTAssertEqual(depthMap.height, 100)
+    }
 }

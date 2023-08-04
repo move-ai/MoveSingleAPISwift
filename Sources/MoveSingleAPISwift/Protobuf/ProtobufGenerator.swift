@@ -36,6 +36,14 @@ final class ProtobufGenerator {
                 }
             }
         }
+
+        static let `default` = Configuration(
+            camera: .front,
+            includeIMUData: true,
+            includeLidarData: true,
+            useDeviceMotionUserAcceleration: false,
+            useDeviceMotionRotationRate: false
+        )
     }
 
     static func generate(from frames: [Frame], config: Configuration) async throws -> Data {
@@ -44,7 +52,7 @@ final class ProtobufGenerator {
             var depthSequence = DepthSequence()
 
             if let lastFrame = frames.last {
-                depthSequence.camera = try camera(from: lastFrame, config: config)
+                depthSequence.camera = camera(from: lastFrame, config: config)
             }
 
             frames.forEach { frame in
@@ -71,7 +79,7 @@ final class ProtobufGenerator {
         }.value
     }
 
-    static func camera(from frame: Frame, config: Configuration) throws -> Camera {
+    static func camera(from frame: Frame, config: Configuration) -> Camera {
         var camera = Camera()
         camera.name = config.camera.pbCameraName
         camera.intrinsics = intrinsic(from: frame.sampleBuffer)
