@@ -14,10 +14,12 @@ enum FileStorageError: Error {
 	case assetWritterDidNotStartWriting
 }
 
-public class FileStorage {
+class FileStorage {
 	private lazy var documentDirectoryURL: URL = URL.documentsDirectory.appending(path: "move-single-api")
 	
 	func saveMove(_ data: Data, fileName: String? = nil) throws -> URL {
+		try FileManager.default.createDirectory(at: documentDirectoryURL, withIntermediateDirectories: true)
+		
 		let fileName = fileName ?? UUID().uuidString
 		let toURL = documentDirectoryURL.appending(path: "\(fileName).\(FileType.move.fileExtension)")
 		try data.write(to: toURL)
@@ -53,8 +55,11 @@ public class FileStorage {
 			sourcePixelBufferAttributes: [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
 		)
 		
+		try FileManager.default.createDirectory(at: documentDirectoryURL, withIntermediateDirectories: true)
+		
 		let fileName = fileName ?? UUID().uuidString
 		let videoURL = documentDirectoryURL.appending(path: "\(fileName).\(FileType.video.fileExtension)")
+		print(videoURL)
 		let assetWriter = try AVAssetWriter(url: videoURL, fileType: AVFileType.mp4)
 		assetWriterVideoInput.expectsMediaDataInRealTime = true
 		assetWriter.add(assetWriterVideoInput)
