@@ -11,7 +11,16 @@ public struct MoveSingleAPISwift {
 		return try await Task {
 			let fileStorage = FileStorage()
 			
-			let moveFileData = try await ProtobufGenerator.generate(from: frames, config: .init(camera: camera, includeIMUData: false, includeLidarData: false, useDeviceMotionUserAcceleration: false, useDeviceMotionRotationRate: false))
+			let hasCameraPositionData = frames.last?.enhancementData.cameraPositionData != nil
+			let hasDepthData = frames.last?.enhancementData.depthSensorData != nil
+			let config = Configuration(
+				camera: camera,
+				includeIMUData: hasCameraPositionData,
+				includeLidarData: hasDepthData,
+				useDeviceMotionUserAcceleration: hasCameraPositionData,
+				useDeviceMotionRotationRate: hasCameraPositionData
+			)
+			let moveFileData = try await ProtobufGenerator.generate(from: frames, config: config)
 			let moveFileURL = try fileStorage.saveMove(moveFileData)
 			let moveFile = File(type: .move, localUrl: moveFileURL)
 			
