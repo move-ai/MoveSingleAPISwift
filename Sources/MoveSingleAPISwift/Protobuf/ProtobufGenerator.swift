@@ -9,43 +9,42 @@ import Foundation
 import AVFoundation
 import CoreMotion
 
-final class ProtobufGenerator {
+public struct Configuration {
+    let camera: Camera
+    let includeIMUData: Bool
+    let includeLidarData: Bool
+    let useDeviceMotionUserAcceleration: Bool
+    let useDeviceMotionRotationRate: Bool
 
-    struct Configuration {
-        let camera: Camera
-        let includeIMUData: Bool
-        let includeLidarData: Bool
-        let useDeviceMotionUserAcceleration: Bool
-        let useDeviceMotionRotationRate: Bool
+    public enum Camera: String, CaseIterable, Identifiable, CustomStringConvertible, Equatable, Codable {
+        case front = "Front"
+        case back = "Back"
+        case backLiDAR = "Back+LiDAR"
 
-        enum Camera: String, CaseIterable, Identifiable, CustomStringConvertible, Equatable, Codable {
-            case front = "Front"
-            case back = "Back"
-            case backLiDAR = "Back+LiDAR"
-
-            var id: Self { self }
-            var description: String { self.rawValue }
-            var pbCameraName: String {
-                switch self {
-                case .front:
-                    return "iPhoneFrontRGB"
-                case .back:
-                    return "iPhoneBackRGB"
-                case .backLiDAR:
-                    return "iPhoneBackLidar"
-                }
+        public var id: Self { self }
+        public var description: String { self.rawValue }
+        public var pbCameraName: String {
+            switch self {
+            case .front:
+                return "iPhoneFrontRGB"
+            case .back:
+                return "iPhoneBackRGB"
+            case .backLiDAR:
+                return "iPhoneBackLidar"
             }
         }
-
-        static let `default` = Configuration(
-            camera: .front,
-            includeIMUData: true,
-            includeLidarData: true,
-            useDeviceMotionUserAcceleration: false,
-            useDeviceMotionRotationRate: false
-        )
     }
 
+    static let `default` = Configuration(
+        camera: .front,
+        includeIMUData: true,
+        includeLidarData: true,
+        useDeviceMotionUserAcceleration: false,
+        useDeviceMotionRotationRate: false
+    )
+}
+
+final class ProtobufGenerator {
     static func generate(from frames: [Frame], config: Configuration) async throws -> Data {
         return try await Task {
             var observations = Observations()

@@ -11,7 +11,7 @@ import XCTest
 final class ProtobufGeneratorImuTests: XCTestCase {
 
     func testImuWithoutDeviceMotion() {
-        let config = ProtobufGenerator.Configuration(
+        let config = Configuration(
             camera: .front,
             includeIMUData: true,
             includeLidarData: true,
@@ -35,7 +35,7 @@ final class ProtobufGeneratorImuTests: XCTestCase {
     }
 
     func testImuWithUserAcceleration() {
-        let config = ProtobufGenerator.Configuration(
+        let config = Configuration(
             camera: .front,
             includeIMUData: true,
             includeLidarData: true,
@@ -59,7 +59,7 @@ final class ProtobufGeneratorImuTests: XCTestCase {
     }
 
     func testImuWithDeviceMotionRotationRate() {
-        let config = ProtobufGenerator.Configuration(
+        let config = Configuration(
             camera: .front,
             includeIMUData: true,
             includeLidarData: true,
@@ -83,7 +83,7 @@ final class ProtobufGeneratorImuTests: XCTestCase {
     }
 
     func testImuWithDeviceMotion() {
-        let config = ProtobufGenerator.Configuration(
+        let config = Configuration(
             camera: .front,
             includeIMUData: true,
             includeLidarData: true,
