@@ -18,6 +18,7 @@ let package = Package(
             url: "https://github.com/apollographql/apollo-ios.git",
             .upToNextMajor(from: "1.0.0")
         ),
+        .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.22.1"),
         .package(path: "./MoveSingleGraphQL")
     ],
     targets: [
@@ -27,6 +28,7 @@ let package = Package(
             name: "MoveSingleAPISwift",
             dependencies: [
                 .product(name: "Apollo", package: "apollo-ios"),
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
                 .product(name: "MoveSingleGraphQL", package: "MoveSingleGraphQL")
             ]
         ),
@@ -34,8 +36,8 @@ let package = Package(
             name: "MoveSingleAPISwiftTests",
             dependencies: [
                 "MoveSingleAPISwift",
-                .product(name: "MoveSingleGraphQLTestMocks", package: "MoveSingleGraphQL"),
-                .product(name: "ApolloTestSupport", package: "apollo-ios")
+                .product(name: "ApolloTestSupport", package: "apollo-ios"),
+                .product(name: "MoveSingleGraphQLTestMocks", package: "MoveSingleGraphQL")
             ]
         )
     ]

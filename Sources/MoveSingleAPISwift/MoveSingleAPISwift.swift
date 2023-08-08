@@ -1,4 +1,10 @@
+import Foundation
+import os
+
 public struct MoveSingleAPISwift {
+
+    private let logger = Logger()
+
     public init(apiKey: String, environment: GraphQLEnvironment = .production) {
         DependencyContainer.register(GraphQLClientImpl(
             apiKey: apiKey,
@@ -7,13 +13,25 @@ public struct MoveSingleAPISwift {
         DependencyContainer.register(URLSessionClientImpl() as URLSessionClient)
     }
 
-    public func createTake(frames: [Frame]) -> Take {
-        // TODO: Generate Files from Frames
+    public func createTake(
+        videoURL: URL,
+        enhancementData: [EnhancementData]? = nil,
+        configuration: Configuration = .default
+    ) async throws -> Take {
 
-        let videoFile = File(type: .video)
-        let moveFile = File(type: .move)
+        var enhancementDataUnwrapped: [EnhancementData] = []
+        if let enhancementData = enhancementData {
+            enhancementDataUnwrapped = enhancementData
+        } else {
+            logger.warning("No Enhancement Data was added. Motion results will be impacted.")
+        }
+
+        let protobufData = try await ProtobufGenerator.generate(from: enhancementDataUnwrapped, config: configuration)
+        let moveFileURL = try await FileStorage.saveMove(protobufData)
+        let moveFile = File(type: .move, localUrl: moveFileURL)
+        let videoFile = File(type: .video, localUrl: videoURL)
+
         let take = Take(videoFile: videoFile, moveFile: moveFile)
         return take
-
     }
 }

@@ -13,13 +13,17 @@ enum FileError: Error {
     case presignedUrlMalformed
 }
 
-actor File {
+public actor File {
     @Dependency private var graphQLClient: GraphQLClient
     @Dependency private var urlSessionClient: URLSessionClient
 
     let type: FileType
     var localUrl: URL? = nil
     var remoteID: String? = nil
+
+    var codable: CodableFile {
+        CodableFile(type: type, localUrl: localUrl, remoteID: remoteID)
+    }
 
     init(type: FileType, localUrl: URL? = nil, remoteID: String? = nil) {
         self.type = type
@@ -47,9 +51,15 @@ actor File {
         try await urlSessionClient.download(url: presignedURL, to: toURL)
         localUrl = toURL
     }
+
+    struct CodableFile: Codable {
+        let type: FileType
+        let localUrl: URL?
+        let remoteID: String?
+    }
 }
 
-enum FileType: String {
+enum FileType: String, Codable {
     case video
     case preview
     case move
