@@ -11,7 +11,8 @@ import XCTest
 final class ProtobufGeneratorIntrinsicsTests: XCTestCase {
 
     func testIntrinsics() {
-        let intrinsics = ProtobufGenerator.intrinsic(from: .mock)
+        let cameraDesignData = CameraDesignData(from: .mock)
+        let intrinsics = ProtobufGenerator.intrinsic(from: cameraDesignData)
         XCTAssertEqual(intrinsics.centerPointX, 7)
         XCTAssertEqual(intrinsics.centerPointY, 8)
         XCTAssertEqual(intrinsics.focalLengthX, 1)

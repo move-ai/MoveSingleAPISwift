@@ -9,7 +9,15 @@
     }
   ],
   "defaultOptions" : {
-
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:",
+          "identifier" : "MoveSingleAPISwift",
+          "name" : "MoveSingleAPISwift"
+        }
+      ]
+    }
   },
   "testTargets" : [
     {

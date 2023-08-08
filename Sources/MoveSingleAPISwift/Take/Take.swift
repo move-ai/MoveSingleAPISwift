@@ -15,9 +15,9 @@ public actor Take {
     @Dependency private var graphQLClient: GraphQLClient
 
     var id: String = UUID().uuidString // This ID will change when we create a take as we then use the remote takeID
-    var numberOfRetakes: Int = 0
-    var videoFile: File
-    var moveFile: File
+    public var numberOfRetakes: Int = 0
+    public var videoFile: File
+    public var moveFile: File
     private var jobs: [Job] = [] // last job is the current job
 
     var uploaded: Bool {
@@ -28,7 +28,7 @@ public actor Take {
         }
     }
 
-    var currentJob: Job? {
+    public var currentJob: Job? {
         return jobs.last
     }
 
@@ -42,12 +42,29 @@ public actor Take {
         }
     }
 
+    var codable: CodableTask {
+        get async {
+            var codableJobs: [Job.CodableJob] = []
+            for job in jobs {
+                codableJobs.append(await job.codable)
+            }
+
+            return CodableTask(
+                id: id,
+                numberOfRetakes: numberOfRetakes,
+                videoFile: await videoFile.codable,
+                moveFile: await moveFile.codable,
+                jobs: codableJobs
+            )
+        }
+    }
+
     init(videoFile: File, moveFile: File) {
         self.videoFile = videoFile
         self.moveFile = moveFile
     }
 
-    func upload() async throws {
+    public func upload() async throws {
         try await withThrowingTaskGroup(of: Void.self) { group in
             group.addTask { try await self.videoFile.upload() }
             group.addTask { try await self.moveFile.upload() }
@@ -62,10 +79,18 @@ public actor Take {
 
     }
 
-    func newJob() async throws {
+    public func newJob() async throws {
         let jobResult = try await graphQLClient.createJob(takeId: id)
         let job = Job(id: jobResult.id)
         jobs.append(job)
+    }
+
+    struct CodableTask {
+        let id: String
+        let numberOfRetakes: Int
+        let videoFile: File.CodableFile
+        let moveFile: File.CodableFile
+        let jobs: [Job.CodableJob]
     }
 }
 

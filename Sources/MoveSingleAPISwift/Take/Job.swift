@@ -7,8 +7,8 @@
 
 import Foundation
 
-actor Job {
-    enum Status: String {
+public actor Job {
+    enum Status: String, Codable {
         case notStarted = "NOT STARTED"
         case started = "RUNNING"
         case failed = "FAILED"
@@ -34,6 +34,16 @@ actor Job {
         "Job(id: \(id), state: \(state), outputFiles: \(outputFiles))"
     }
 
+    var codable: CodableJob {
+        get async {
+            var codableFiles: [File.CodableFile] = []
+            for file in outputFiles {
+                codableFiles.append(await file.codable)
+            }
+            return CodableJob(id: id, state: state, outputFiles: codableFiles)
+        }
+    }
+
     init(id: String) {
         self.id = id
     }
@@ -49,5 +59,11 @@ actor Job {
             }
             outputFiles = files ?? []
         }
+    }
+
+    struct CodableJob: Codable {
+        let id: String
+        let state: Status
+        let outputFiles: [File.CodableFile]
     }
 }

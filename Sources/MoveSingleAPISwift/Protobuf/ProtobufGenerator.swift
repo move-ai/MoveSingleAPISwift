@@ -9,65 +9,31 @@ import Foundation
 import AVFoundation
 import CoreMotion
 
-public struct Configuration {
-    let camera: Camera
-    let includeIMUData: Bool
-    let includeLidarData: Bool
-    let useDeviceMotionUserAcceleration: Bool
-    let useDeviceMotionRotationRate: Bool
-
-    public enum Camera: String, CaseIterable, Identifiable, CustomStringConvertible, Equatable, Codable {
-        case front = "Front"
-        case back = "Back"
-        case backLiDAR = "Back+LiDAR"
-
-        public var id: Self { self }
-        public var description: String { self.rawValue }
-        public var pbCameraName: String {
-            switch self {
-            case .front:
-                return "iPhoneFrontRGB"
-            case .back:
-                return "iPhoneBackRGB"
-            case .backLiDAR:
-                return "iPhoneBackLidar"
-            }
-        }
-    }
-
-    static let `default` = Configuration(
-        camera: .front,
-        includeIMUData: true,
-        includeLidarData: true,
-        useDeviceMotionUserAcceleration: false,
-        useDeviceMotionRotationRate: false
-    )
-}
-
 final class ProtobufGenerator {
-    static func generate(from frames: [Frame], config: Configuration) async throws -> Data {
+
+    static func generate(from enhancementData: [EnhancementData], config: Configuration) async throws -> Data {
         return try await Task {
             var observations = Observations()
             var depthSequence = DepthSequence()
 
-            if let lastFrame = frames.last {
-                depthSequence.camera = camera(from: lastFrame, config: config)
+            if let lastEnhancementDataFrame = enhancementData.last {
+                depthSequence.camera = camera(from: lastEnhancementDataFrame, config: config)
             }
 
-            frames.forEach { frame in
+            enhancementData.forEach { enhancementDataFrame in
                 var odometryInstance = OdometryInstance()
 
-                if let extrinsicMatrix = frame.enhancementData.depthSensorData?.depthData.cameraCalibrationData?.extrinsicMatrix {
+                if let extrinsicMatrix = enhancementDataFrame.depthSensorData?.depthData.cameraCalibrationData?.extrinsicMatrix {
                     odometryInstance.coordinateSystem.transform = transform(from: extrinsicMatrix)
                 }
 
-                if config.includeIMUData, let cameraPositionData = frame.enhancementData.cameraPositionData {
+                if config.includeIMUData, let cameraPositionData = enhancementDataFrame.cameraPositionData {
                     odometryInstance.imu = imu(from: cameraPositionData, config: config)
                 }
 
                 depthSequence.camera.odometry.trajectory.append(odometryInstance)
 
-                if config.includeLidarData, let depthData = frame.enhancementData.depthSensorData?.depthData {
+                if config.includeLidarData, let depthData = enhancementDataFrame.depthSensorData?.depthData {
                     depthSequence.frames.append(depthMap(from: depthData))
                 }
             }
@@ -78,42 +44,31 @@ final class ProtobufGenerator {
         }.value
     }
 
-    static func camera(from frame: Frame, config: Configuration) -> Camera {
+    static func camera(from enhancementData: EnhancementData, config: Configuration) -> Camera {
         var camera = Camera()
         camera.name = config.camera.pbCameraName
-        camera.intrinsics = intrinsic(from: frame.sampleBuffer)
-        if let extrinsicMatrix = frame.enhancementData.depthSensorData?.depthData.cameraCalibrationData?.extrinsicMatrix {
+
+        if let cameraDesignData = enhancementData.cameraDesignData {
+            camera.intrinsics = intrinsic(from: cameraDesignData)
+        }
+        if let extrinsicMatrix = enhancementData.depthSensorData?.depthData.cameraCalibrationData?.extrinsicMatrix {
             camera.extrinsics = extrinsics(from: extrinsicMatrix)
         }
         return camera
     }
 
-    static func intrinsic(from sampleBuffer: CMSampleBuffer) -> Camera.Intrinsics {
-        var height: Int = 0
-        var width: Int = 0
-        if let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
-            height = CVPixelBufferGetHeight(imageBuffer)
-            width = CVPixelBufferGetWidth(imageBuffer)
-        }
-
-        var intrinsicMatrix = matrix_float3x3()
-        if let camData = CMGetAttachment(sampleBuffer,
-                                         key: kCMSampleBufferAttachmentKey_CameraIntrinsicMatrix,
-                                         attachmentModeOut: nil) as? Data {
-            intrinsicMatrix = camData.withUnsafeBytes { $0.pointee }
-        }
-
+    static func intrinsic(from cameraDesignData: CameraDesignData) -> Camera.Intrinsics {
         var intrinsics = Camera.Intrinsics()
-        intrinsics.centerPointX = intrinsicMatrix[2][0]
-        intrinsics.centerPointY = intrinsicMatrix[2][1]
+        intrinsics.centerPointX = cameraDesignData.intrinsicMatrix[2][0]
+        intrinsics.centerPointY = cameraDesignData.intrinsicMatrix[2][1]
 
-        intrinsics.focalLengthX = intrinsicMatrix[0][0]
-        intrinsics.focalLengthY = intrinsicMatrix[1][1]
+        intrinsics.focalLengthX = cameraDesignData.intrinsicMatrix[0][0]
+        intrinsics.focalLengthY = cameraDesignData.intrinsicMatrix[1][1]
 
-        intrinsics.skew = intrinsicMatrix[0][1]
+        intrinsics.skew = cameraDesignData.intrinsicMatrix[0][1]
         intrinsics.resolution = Camera.Intrinsics.Resolution()
-        intrinsics.resolution.width = Int32(width)
-        intrinsics.resolution.height = Int32(height)
+        intrinsics.resolution.width = Int32(cameraDesignData.width)
+        intrinsics.resolution.height = Int32(cameraDesignData.height)
 
         return intrinsics
     }
@@ -189,12 +144,12 @@ final class ProtobufGenerator {
 
     static func imu(from cameraPositionData: CameraPositionData, config: Configuration) -> IMU {
 
-        let accVector = config.useDeviceMotionUserAcceleration ? cameraPositionData.deviceMotion.userAcceleration : cameraPositionData.accelerometerData.acceleration
+        let accVector = config.useDeviceMotionUserAcceleration ? cameraPositionData.deviceMotion?.userAcceleration ?? .init() : cameraPositionData.accelerometerData?.acceleration ?? .init()
         let gyrVector = config.useDeviceMotionRotationRate ? CMRotationRate(
-            x: cameraPositionData.deviceMotion.attitude.pitch,
-            y: cameraPositionData.deviceMotion.attitude.roll,
-            z: cameraPositionData.deviceMotion.attitude.yaw
-        ) : cameraPositionData.gyroData.rotationRate
+            x: cameraPositionData.deviceMotion?.attitude.pitch ?? 0,
+            y: cameraPositionData.deviceMotion?.attitude.roll ?? 0,
+            z: cameraPositionData.deviceMotion?.attitude.yaw ?? 0
+        ) : cameraPositionData.gyroData?.rotationRate ?? .init()
 
         var imu = IMU()
         imu.gyrX = Float(gyrVector.x)
@@ -203,12 +158,12 @@ final class ProtobufGenerator {
         imu.accX = Float(accVector.x)
         imu.accY = Float(accVector.y)
         imu.accZ = Float(accVector.z)
-        imu.magX = Float(cameraPositionData.magnetometerData.magneticField.x)
-        imu.magY = Float(cameraPositionData.magnetometerData.magneticField.y)
-        imu.magZ = Float(cameraPositionData.magnetometerData.magneticField.z)
-        imu.grvX = Float(cameraPositionData.deviceMotion.gravity.x)
-        imu.grvY = Float(cameraPositionData.deviceMotion.gravity.y)
-        imu.grvZ = Float(cameraPositionData.deviceMotion.gravity.z)
+        imu.magX = Float(cameraPositionData.magnetometerData?.magneticField.x ?? 0)
+        imu.magY = Float(cameraPositionData.magnetometerData?.magneticField.y ?? 0)
+        imu.magZ = Float(cameraPositionData.magnetometerData?.magneticField.z ?? 0)
+        imu.grvX = Float(cameraPositionData.deviceMotion?.gravity.x ?? 0)
+        imu.grvY = Float(cameraPositionData.deviceMotion?.gravity.y ?? 0)
+        imu.grvZ = Float(cameraPositionData.deviceMotion?.gravity.z ?? 0)
 
         return imu
 

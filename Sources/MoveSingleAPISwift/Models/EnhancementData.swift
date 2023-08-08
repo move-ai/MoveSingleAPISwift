@@ -6,6 +6,13 @@
 //
 
 public struct EnhancementData {
+    let cameraDesignData: CameraDesignData?
     let cameraPositionData: CameraPositionData?
     let depthSensorData: DepthSensorData?
+
+    public init(cameraDesignData: CameraDesignData?, cameraPositionData: CameraPositionData?, depthSensorData: DepthSensorData?) {
+        self.cameraDesignData = cameraDesignData
+        self.cameraPositionData = cameraPositionData
+        self.depthSensorData = depthSensorData
+    }
 }

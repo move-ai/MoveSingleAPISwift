@@ -10,9 +10,30 @@ import XCTest
 
 final class ProtobufGeneratorGenerateTests: XCTestCase {
 
-    func testGenerate() async throws {
-        let data = try await ProtobufGenerator.generate(from: [.mock], config: .default)
-        XCTAssertEqual(data.count, 81267)
+    func testGenerateNoEnhancement() async throws {
+        let enhancementData = EnhancementData(cameraDesignData: nil, cameraPositionData: nil, depthSensorData: nil)
+        let data = try await ProtobufGenerator.generate(from: [enhancementData], config: .default)
+        XCTAssertEqual(data.count, 24)
+    }
+
+    func testGenerateWithCamera() async throws {
+        let cameraDesignData = CameraDesignData(from: .mock)
+        let enhancementData = EnhancementData(cameraDesignData: cameraDesignData, cameraPositionData: nil, depthSensorData: nil)
+        let data = try await ProtobufGenerator.generate(from: [enhancementData], config: .default)
+        XCTAssertEqual(data.count, 57)
+    }
+
+    func testGenerateWithIMU() async throws {
+        let enhancementData = EnhancementData(cameraDesignData: nil, cameraPositionData: .mock, depthSensorData: nil)
+        let data = try await ProtobufGenerator.generate(from: [enhancementData], config: .default)
+        XCTAssertEqual(data.count, 86)
+    }
+
+    func testGenerateWithCameraAndIMU() async throws {
+        let cameraDesignData = CameraDesignData(from: .mock)
+        let enhancementData = EnhancementData(cameraDesignData: cameraDesignData, cameraPositionData: .mock, depthSensorData: nil)
+        let data = try await ProtobufGenerator.generate(from: [enhancementData], config: .default)
+        XCTAssertEqual(data.count, 119)
     }
 
 }
