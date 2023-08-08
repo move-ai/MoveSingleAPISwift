@@ -14,6 +14,7 @@ public struct MoveSingleAPISwift {
     }
 
     public func createTake(
+        takeID: String,
         videoURL: URL,
         enhancementData: [EnhancementData]? = nil,
         configuration: Configuration = .default
@@ -31,7 +32,7 @@ public struct MoveSingleAPISwift {
         let moveFile = File(type: .move, localUrl: moveFileURL)
         let videoFile = File(type: .video, localUrl: videoURL)
 
-        let take = Take(videoFile: videoFile, moveFile: moveFile)
+        let take = Take(takeID: takeID, videoFile: videoFile, moveFile: moveFile)
         return take
     }
 }

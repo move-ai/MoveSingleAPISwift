@@ -8,10 +8,9 @@
 import Foundation
 
 class FileStorage {
-	private static var documentDirectoryURL: URL = URL.documentsDirectory.appending(path: "move-single-api")
-	
-	static func saveMove(_ data: Data, fileName: String? = nil) async throws -> URL {
+    static func saveMove(_ data: Data, fileName: String? = nil, directory: String? = nil) async throws -> URL {
         return try await Task {
+            let documentDirectoryURL = URL.documentsDirectory.appending(path: directory ?? "")
             try FileManager.default.createDirectory(at: documentDirectoryURL, withIntermediateDirectories: true)
             
             let fileName = fileName ?? UUID().uuidString

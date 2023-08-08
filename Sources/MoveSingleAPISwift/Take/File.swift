@@ -13,22 +13,30 @@ enum FileError: Error {
     case presignedUrlMalformed
 }
 
-public actor File {
+public actor File: Equatable, Hashable {
+
     @Dependency private var graphQLClient: GraphQLClient
     @Dependency private var urlSessionClient: URLSessionClient
 
-    let type: FileType
-    var localUrl: URL? = nil
-    var remoteID: String? = nil
+    let id = UUID()
+    public let type: FileType
+    public var localUrl: URL? = nil
+    public var remoteID: String? = nil
 
     var codable: CodableFile {
         CodableFile(type: type, localUrl: localUrl, remoteID: remoteID)
     }
 
-    init(type: FileType, localUrl: URL? = nil, remoteID: String? = nil) {
+    public init(type: FileType, localUrl: URL? = nil, remoteID: String? = nil) {
         self.type = type
         self.localUrl = localUrl
         self.remoteID = remoteID
+    }
+
+    public init(from: CodableFile) {
+        self.type = from.type
+        self.localUrl = from.localUrl
+        self.remoteID = from.remoteID
     }
 
     func upload() async throws {
@@ -41,7 +49,7 @@ public actor File {
         self.remoteID = fileResult.id
     }
 
-    func download() async throws {
+    public func download() async throws {
         guard let remoteID = remoteID else { throw FileError.remoteIdMissing }
         let fileResult = try await graphQLClient.getFile(id: remoteID)
         let toURL = URL.documentsDirectory.appending(path: "move-single-api").appending(path: "\(remoteID).\(type.fileExtension)")
@@ -52,21 +60,29 @@ public actor File {
         localUrl = toURL
     }
 
-    struct CodableFile: Codable {
+    public struct CodableFile: Codable {
         let type: FileType
         let localUrl: URL?
         let remoteID: String?
     }
+
+    public static nonisolated func == (lhs: File, rhs: File) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    public nonisolated func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
-enum FileType: String, Codable {
+public enum FileType: String, Codable {
     case video
     case preview
     case move
     case fbx
     case usdc
 
-    var fileExtension: String {
+    public var fileExtension: String {
         switch self {
         case .fbx: return "fbx"
         case .move: return "move"

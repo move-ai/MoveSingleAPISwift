@@ -19,6 +19,7 @@ let package = Package(
             .upToNextMajor(from: "1.0.0")
         ),
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.22.1"),
+        .package(url: "https://github.com/marmelroy/Zip.git", from: "2.1.0"),
         .package(path: "./MoveSingleGraphQL")
     ],
     targets: [
@@ -29,6 +30,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Apollo", package: "apollo-ios"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+                .product(name: "Zip", package: "Zip"),
                 .product(name: "MoveSingleGraphQL", package: "MoveSingleGraphQL")
             ]
         ),
