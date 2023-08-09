@@ -16,8 +16,8 @@ final class TakeTests: XCTestCase {
     }
 
     func testUpload() async throws {
-        let videoFile = File(type: .video, localUrl: URL(string: "http://www.move.ai")!)
-        let moveFile = File(type: .move, localUrl: URL(string: "http://www.move.ai")!)
+        let videoFile = File(type: .video, localFileName: "ABC")
+        let moveFile = File(type: .move, localFileName: "ABC")
         let take = Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
         let oldTakeID = await take.takeID
         try await take.upload()

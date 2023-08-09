@@ -12,10 +12,11 @@ enum TakeError: Error {
     case filesNotUploaded
 }
 
-public actor Take: Identifiable {
+public actor Take: Identifiable, Equatable {
+
     @Dependency private var graphQLClient: GraphQLClient
 
-    public let id: String // needed to be Identifiable
+    public nonisolated let id: UUID // needed to be Identifiable
     public var takeID: String // This ID will change when we create a take as we then use the remote takeID
     public var numberOfRetakes: Int = 0
     public var videoFile: File
@@ -47,7 +48,7 @@ public actor Take: Identifiable {
     public var info: String {
         get async {
             return """
-            ID: \(takeID)
+            takeID: \(takeID)
             numberOfRetakes: \(numberOfRetakes)
             videoRemoteID: \(await videoFile.remoteID ?? "NA")
             moveRemoteID: \(await moveFile.remoteID ?? "NA")
@@ -65,7 +66,8 @@ public actor Take: Identifiable {
             }
 
             return CodableTake(
-                id: takeID,
+                id: id,
+                takeID: takeID,
                 numberOfRetakes: numberOfRetakes,
                 videoFile: await videoFile.codable,
                 moveFile: await moveFile.codable,
@@ -75,7 +77,7 @@ public actor Take: Identifiable {
     }
 
     public init(takeID: String, videoFile: File, moveFile: File) {
-        self.id = takeID
+        self.id = UUID()
         self.takeID = takeID
         self.videoFile = videoFile
         self.moveFile = moveFile
@@ -83,7 +85,7 @@ public actor Take: Identifiable {
 
     public init(from: CodableTake) {
         self.id = from.id
-        self.takeID = from.id
+        self.takeID = from.takeID
         self.numberOfRetakes = from.numberOfRetakes
         self.videoFile = File(from: from.videoFile)
         self.moveFile = File(from: from.moveFile)
@@ -91,18 +93,13 @@ public actor Take: Identifiable {
     }
 
     public func upload() async throws {
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask { try await self.videoFile.upload() }
-            group.addTask { try await self.moveFile.upload() }
-
-            try await group.waitForAll()
-        }
+        try await self.videoFile.upload()
+        try await self.moveFile.upload()
         guard let videoFileID = await videoFile.remoteID, let moveFileID = await moveFile.remoteID else {
             throw TakeError.filesNotUploaded
         }
         let takeResult = try await graphQLClient.createTake(videoFileId: videoFileID, moveFileId: moveFileID)
         takeID = takeResult.id
-
     }
 
     public func newJob() async throws {
@@ -124,11 +121,16 @@ public actor Take: Identifiable {
     }
 
     public struct CodableTake: Codable {
-        let id: String
+        let id: UUID
+        let takeID: String
         let numberOfRetakes: Int
         let videoFile: File.CodableFile
         let moveFile: File.CodableFile
         let jobs: [Job.CodableJob]
+    }
+
+    public static func == (lhs: Take, rhs: Take) -> Bool {
+        lhs.id == rhs.id
     }
 }
 

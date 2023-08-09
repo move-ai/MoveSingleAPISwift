@@ -1,16 +1,23 @@
 import Foundation
 import os
 
-public struct MoveSingleAPISwift {
+public struct Move {
 
+    private let fileStorage: FileStorageClient
     private let logger = Logger()
 
-    public init(apiKey: String, environment: GraphQLEnvironment = .production) {
+    public init(
+        apiKey: String,
+        environment: GraphQLEnvironment = .production,
+        outputDirectory: String = ""
+    ) {
+        self.fileStorage = FileStorageClientImpl(outputDirectory: outputDirectory)
         DependencyContainer.register(GraphQLClientImpl(
             apiKey: apiKey,
             environment: environment
         ) as GraphQLClient)
         DependencyContainer.register(URLSessionClientImpl() as URLSessionClient)
+        DependencyContainer.register(fileStorage)
     }
 
     public func createTake(
@@ -28,9 +35,9 @@ public struct MoveSingleAPISwift {
         }
 
         let protobufData = try await ProtobufGenerator.generate(from: enhancementDataUnwrapped, config: configuration)
-        let moveFileURL = try await FileStorage.saveMove(protobufData)
-        let moveFile = File(type: .move, localUrl: moveFileURL)
-        let videoFile = File(type: .video, localUrl: videoURL)
+        let moveFileName = try await fileStorage.saveMove(protobufData)
+        let moveFile = File(type: .move, localFileName: moveFileName)
+        let videoFile = File(type: .video, localFileName: videoURL.deletingPathExtension().lastPathComponent)
 
         let take = Take(takeID: takeID, videoFile: videoFile, moveFile: moveFile)
         return take

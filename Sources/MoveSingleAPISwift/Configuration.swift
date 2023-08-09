@@ -9,7 +9,6 @@ import Foundation
 
 public struct Configuration {
     let camera: Camera
-    let outputDirectoryName: String?
     let includeIMUData: Bool
     let includeLidarData: Bool
     let useDeviceMotionUserAcceleration: Bool
@@ -17,14 +16,12 @@ public struct Configuration {
 
     public init(
         camera: Camera,
-        outputDirectoryName: String? = nil,
         includeIMUData: Bool,
         includeLidarData: Bool,
         useDeviceMotionUserAcceleration: Bool,
         useDeviceMotionRotationRate: Bool
     ) {
         self.camera = camera
-        self.outputDirectoryName = outputDirectoryName
         self.includeIMUData = includeIMUData
         self.includeLidarData = includeLidarData
         self.useDeviceMotionUserAcceleration = useDeviceMotionUserAcceleration
@@ -52,7 +49,6 @@ public struct Configuration {
 
     public static let `default` = Configuration(
         camera: .front,
-        outputDirectoryName: nil,
         includeIMUData: true,
         includeLidarData: true,
         useDeviceMotionUserAcceleration: false,

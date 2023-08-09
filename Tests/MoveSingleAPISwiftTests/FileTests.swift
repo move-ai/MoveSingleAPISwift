@@ -13,10 +13,11 @@ final class FileTests: XCTestCase {
     override func setUpWithError() throws {
         DependencyContainer.register(GraphQLClientMock() as GraphQLClient)
         DependencyContainer.register(URLSessionClientMock() as URLSessionClient)
+        DependencyContainer.register(FileStorageClientMock() as FileStorageClient)
     }
 
     func testUploadSuccess() async throws {
-        let file = File(type: .video, localUrl: URL(string: "http://www.move.ai")!)
+        let file = File(type: .video, localFileName: "ABC")
         await XCTAssertNilAsync(await file.remoteID)
         try await file.upload()
         await XCTAssertNotNilAsync(await file.remoteID)
@@ -32,7 +33,7 @@ final class FileTests: XCTestCase {
     func testUploadMalformedPresignedUrl() async throws {
         DependencyContainer.register(GraphQLClientMock(presignedUrl: "") as GraphQLClient)
 
-        let file = File(type: .video, localUrl: URL(string: "http://www.move.ai")!)
+        let file = File(type: .video, localFileName: "ABC")
         await XCTAssertNilAsync(await file.remoteID)
         await XCTAssertThrowsError(try await file.upload())
         await XCTAssertNilAsync(await file.remoteID)
