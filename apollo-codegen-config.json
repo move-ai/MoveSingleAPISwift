@@ -10,15 +10,19 @@
   },
   "output" : {
     "testMocks" : {
-        "swiftPackage" : {
-            "targetName" : "MoveSingleGraphQLTestMocks"
+        "absolute": {
+            "path" : "./Tests/MoveSingleAPISwiftTests/GraphQLMocks/",
+            "accessModifier": "internal"
         }
     },
     "schemaTypes": {
         "moduleType": {
-            "swiftPackageManager": {}
+            "embeddedInTarget": {
+                "name": "MoveSingleAPISwift",
+                "accessModifier": "internal"
+            }
         },
-        "path": "./MoveSingleGraphQL/"
+        "path": "./Sources/MoveSingleAPISwift/GraphQL/generated/"
     },
     "operations" : {
       "inSchemaModule" : {

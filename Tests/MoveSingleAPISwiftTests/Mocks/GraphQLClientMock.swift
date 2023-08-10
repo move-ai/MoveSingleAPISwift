@@ -6,9 +6,7 @@
 //
 
 import Foundation
-import MoveSingleGraphQLTestMocks
 import ApolloTestSupport
-import MoveSingleGraphQL
 @testable import MoveSingleAPISwift
 
 class GraphQLClientMock: GraphQLClient {
@@ -21,44 +19,45 @@ class GraphQLClientMock: GraphQLClient {
         self.jobState = jobState
     }
 
-    func createFile(type: String) async throws -> CreateFileMutation.Data.File {
-        let mock = Mock<MoveSingleGraphQLTestMocks.File>()
+    func createFile(type: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File {
+        let mock = Mock<File>()
         mock.id = UUID().uuidString
         mock.presignedUrl = presignedUrl
-        let model = CreateFileMutation.Data.File.from(mock)
+        let model = MoveSingleGraphQL.CreateFileMutation.Data.File.from(mock)
         return model
     }
 
-    func getFile(id: String) async throws -> FileQuery.Data.File {
-        let mock = Mock<MoveSingleGraphQLTestMocks.File>()
+    func getFile(id: String) async throws -> MoveSingleGraphQL.FileQuery.Data.File {
+        let mock = Mock<File>()
         mock.presignedUrl = presignedUrl
-        let model = FileQuery.Data.File.from(mock)
+        let model = MoveSingleGraphQL.FileQuery.Data.File.from(mock)
         return model
     }
 
-    func createTake(videoFileId: String, moveFileId: String) async throws -> CreateTakeMutation.Data.Take {
-        let mock = Mock<MoveSingleGraphQLTestMocks.Take>()
+    func createTake(videoFileId: String, moveFileId: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take {
+        let mock = Mock<Take>()
         mock.id = UUID().uuidString
-        let model = CreateTakeMutation.Data.Take.from(mock)
+        let model = MoveSingleGraphQL.CreateTakeMutation.Data.Take.from(mock)
         return model
     }
 
-    func getTake(id: String) async throws -> TakeQuery.Data.Take {
-        let mock = Mock<MoveSingleGraphQLTestMocks.Take>()
-        let model = TakeQuery.Data.Take.from(mock)
+    func getTake(id: String) async throws -> MoveSingleGraphQL.TakeQuery.Data.Take {
+        let mock = Mock<Take>()
+        let model = MoveSingleGraphQL.TakeQuery.Data.Take.from(mock)
         return model
     }
 
-    func createJob(takeId: String) async throws -> CreateJobMutation.Data.Job {
-        let mock = Mock<MoveSingleGraphQLTestMocks.Job>()
+    func createJob(takeId: String) async throws -> MoveSingleGraphQL.CreateJobMutation.Data.Job {
+        let mock = Mock<Job>()
         mock.id = UUID().uuidString
         mock.state = "NOT STARTED"
-        let model = CreateJobMutation.Data.Job.from(mock)
+        let model = MoveSingleGraphQL.CreateJobMutation.Data.Job.from(mock)
         return model
     }
 
-    func getJob(id: String) async throws -> JobQuery.Data.Job {
-        let mock = Mock<MoveSingleGraphQLTestMocks.Job>()
+    func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job {
+        
+        let mock = Mock<Job>()
         mock.state = jobState
         if jobState == "FINISHED" {
             mock.outputs = []
@@ -73,7 +72,7 @@ class GraphQLClientMock: GraphQLClient {
             )
 
         }
-        let model = JobQuery.Data.Job.from(mock)
+        let model = MoveSingleGraphQL.JobQuery.Data.Job.from(mock)
         return model
     }
 

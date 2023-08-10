@@ -17,14 +17,14 @@ final class FileTests: XCTestCase {
     }
 
     func testUploadSuccess() async throws {
-        let file = File(type: .video, localFileName: "ABC")
+        let file = MoveSingleAPISwift.File(type: .video, localFileName: "ABC")
         await XCTAssertNilAsync(await file.remoteID)
         try await file.upload()
         await XCTAssertNotNilAsync(await file.remoteID)
     }
 
     func testDownloadSuccess() async throws {
-        let file = File(type: .video, remoteID: UUID().uuidString)
+        let file = MoveSingleAPISwift.File(type: .video, remoteID: UUID().uuidString)
         await XCTAssertNilAsync(await file.localUrl)
         try await file.download()
         await XCTAssertNotNilAsync(await file.localUrl)
@@ -33,7 +33,7 @@ final class FileTests: XCTestCase {
     func testUploadMalformedPresignedUrl() async throws {
         DependencyContainer.register(GraphQLClientMock(presignedUrl: "") as GraphQLClient)
 
-        let file = File(type: .video, localFileName: "ABC")
+        let file = MoveSingleAPISwift.File(type: .video, localFileName: "ABC")
         await XCTAssertNilAsync(await file.remoteID)
         await XCTAssertThrowsError(try await file.upload())
         await XCTAssertNilAsync(await file.remoteID)
@@ -42,21 +42,21 @@ final class FileTests: XCTestCase {
     func testDownloadMalformedPresignedUrl() async throws {
         DependencyContainer.register(GraphQLClientMock(presignedUrl: "") as GraphQLClient)
 
-        let file = File(type: .video, remoteID: UUID().uuidString)
+        let file = MoveSingleAPISwift.File(type: .video, remoteID: UUID().uuidString)
         await XCTAssertNilAsync(await file.localUrl)
         await XCTAssertThrowsError(try await file.download())
         await XCTAssertNilAsync(await file.localUrl)
     }
 
     func testUploadMissingLocalUrl() async throws {
-        let file = File(type: .video)
+        let file = MoveSingleAPISwift.File(type: .video)
         await XCTAssertNilAsync(await file.remoteID)
         await XCTAssertThrowsError(try await file.upload())
         await XCTAssertNilAsync(await file.remoteID)
     }
 
     func testDownloadMissingRemoteId() async throws {
-        let file = File(type: .video)
+        let file = MoveSingleAPISwift.File(type: .video)
         await XCTAssertNilAsync(await file.localUrl)
         await XCTAssertThrowsError(try await file.download())
         await XCTAssertNilAsync(await file.localUrl)

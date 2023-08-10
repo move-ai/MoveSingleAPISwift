@@ -17,9 +17,9 @@ final class TakeTests: XCTestCase {
     }
 
     func testUpload() async throws {
-        let videoFile = File(type: .video, localFileName: "ABC")
-        let moveFile = File(type: .move, localFileName: "ABC")
-        let take = Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
+        let videoFile = MoveSingleAPISwift.File(type: .video, localFileName: "ABC")
+        let moveFile = MoveSingleAPISwift.File(type: .move, localFileName: "ABC")
+        let take = MoveSingleAPISwift.Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
         let oldTakeID = await take.takeID
         try await take.upload()
         let uploaded = await take.uploaded
@@ -30,18 +30,18 @@ final class TakeTests: XCTestCase {
     }
 
     func testAddOneJob() async throws {
-        let videoFile = File(type: .video)
-        let moveFile = File(type: .move)
-        let take = Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
+        let videoFile = MoveSingleAPISwift.File(type: .video)
+        let moveFile = MoveSingleAPISwift.File(type: .move)
+        let take = MoveSingleAPISwift.Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
         await XCTAssertNilAsync(await take.currentJob)
         try await take.newJob()
         await XCTAssertNotNilAsync(await take.currentJob)
     }
 
     func testAddTwoJobs() async throws {
-        let videoFile = File(type: .video)
-        let moveFile = File(type: .move)
-        let take = Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
+        let videoFile = MoveSingleAPISwift.File(type: .video)
+        let moveFile = MoveSingleAPISwift.File(type: .move)
+        let take = MoveSingleAPISwift.Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
 
         try await take.newJob()
         let firstJobID = await take.currentJob?.id
