@@ -13,6 +13,7 @@ final class TakeTests: XCTestCase {
     override func setUpWithError() throws {
         DependencyContainer.register(GraphQLClientMock() as GraphQLClient)
         DependencyContainer.register(URLSessionClientMock() as URLSessionClient)
+        DependencyContainer.register(FileStorageClientMock() as FileStorageClient)
     }
 
     func testUpload() async throws {
