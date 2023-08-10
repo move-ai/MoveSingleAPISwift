@@ -105,4 +105,17 @@ public enum FileType: String, Codable {
         case .video: return "mp4"
         }
     }
+
+    init?(from string: String) {
+        switch string {
+        case "mp4":
+            self = .preview
+        default:
+            if let type = FileType(rawValue: string) {
+                self = type
+            } else {
+                return nil
+            }
+        }
+    }
 }
