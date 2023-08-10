@@ -14,6 +14,20 @@ public struct Configuration {
     let useDeviceMotionUserAcceleration: Bool
     let useDeviceMotionRotationRate: Bool
 
+    public init(
+        camera: Camera,
+        includeIMUData: Bool,
+        includeLidarData: Bool,
+        useDeviceMotionUserAcceleration: Bool,
+        useDeviceMotionRotationRate: Bool
+    ) {
+        self.camera = camera
+        self.includeIMUData = includeIMUData
+        self.includeLidarData = includeLidarData
+        self.useDeviceMotionUserAcceleration = useDeviceMotionUserAcceleration
+        self.useDeviceMotionRotationRate = useDeviceMotionRotationRate
+    }
+
     public enum Camera: String, CaseIterable, Identifiable, CustomStringConvertible, Equatable, Codable {
         case front = "Front"
         case back = "Back"

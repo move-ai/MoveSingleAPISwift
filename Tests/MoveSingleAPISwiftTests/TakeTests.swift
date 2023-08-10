@@ -13,16 +13,17 @@ final class TakeTests: XCTestCase {
     override func setUpWithError() throws {
         DependencyContainer.register(GraphQLClientMock() as GraphQLClient)
         DependencyContainer.register(URLSessionClientMock() as URLSessionClient)
+        DependencyContainer.register(FileStorageClientMock() as FileStorageClient)
     }
 
     func testUpload() async throws {
-        let videoFile = File(type: .video, localUrl: URL(string: "http://www.move.ai")!)
-        let moveFile = File(type: .move, localUrl: URL(string: "http://www.move.ai")!)
-        let take = Take(videoFile: videoFile, moveFile: moveFile)
-        let oldTakeID = await take.id
+        let videoFile = File(type: .video, localFileName: "ABC")
+        let moveFile = File(type: .move, localFileName: "ABC")
+        let take = Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
+        let oldTakeID = await take.takeID
         try await take.upload()
         let uploaded = await take.uploaded
-        let newTakeID = await take.id
+        let newTakeID = await take.takeID
 
         XCTAssert(uploaded)
         XCTAssert(oldTakeID != newTakeID)
@@ -31,7 +32,7 @@ final class TakeTests: XCTestCase {
     func testAddOneJob() async throws {
         let videoFile = File(type: .video)
         let moveFile = File(type: .move)
-        let take = Take(videoFile: videoFile, moveFile: moveFile)
+        let take = Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
         await XCTAssertNilAsync(await take.currentJob)
         try await take.newJob()
         await XCTAssertNotNilAsync(await take.currentJob)
@@ -40,7 +41,7 @@ final class TakeTests: XCTestCase {
     func testAddTwoJobs() async throws {
         let videoFile = File(type: .video)
         let moveFile = File(type: .move)
-        let take = Take(videoFile: videoFile, moveFile: moveFile)
+        let take = Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
 
         try await take.newJob()
         let firstJobID = await take.currentJob?.id

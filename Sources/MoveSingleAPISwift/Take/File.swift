@@ -13,22 +13,42 @@ enum FileError: Error {
     case presignedUrlMalformed
 }
 
-public actor File {
+public actor File: Equatable, Hashable {
+
     @Dependency private var graphQLClient: GraphQLClient
     @Dependency private var urlSessionClient: URLSessionClient
+    @Dependency private var fileStorage: FileStorageClient
 
-    let type: FileType
-    var localUrl: URL? = nil
-    var remoteID: String? = nil
+    nonisolated let id: UUID
+    public let type: FileType
+    public var localFileName: String? = nil
+    public var remoteID: String? = nil
+    private let staticLocalUrl: URL?
 
     var codable: CodableFile {
-        CodableFile(type: type, localUrl: localUrl, remoteID: remoteID)
+        CodableFile(id: id, type: type, localFileName: localFileName, remoteID: remoteID, staticLocalUrl: staticLocalUrl)
     }
 
-    init(type: FileType, localUrl: URL? = nil, remoteID: String? = nil) {
+    public var localUrl: URL? {
+        if let staticLocalUrl = staticLocalUrl { return staticLocalUrl }
+        guard let localFileName = localFileName else { return nil }
+        return URL.documentsDirectory.appending(path: "\(fileStorage.outputDirectory)/\(localFileName).\(type.fileExtension)")
+    }
+
+    public init(type: FileType, localFileName: String? = nil, remoteID: String? = nil, staticLocalUrl: URL? = nil) {
+        self.id = UUID()
         self.type = type
-        self.localUrl = localUrl
+        self.localFileName = localFileName
         self.remoteID = remoteID
+        self.staticLocalUrl = staticLocalUrl
+    }
+
+    public init(from: CodableFile) {
+        self.id = from.id
+        self.type = from.type
+        self.localFileName = from.localFileName
+        self.remoteID = from.remoteID
+        self.staticLocalUrl = from.staticLocalUrl
     }
 
     func upload() async throws {
@@ -41,38 +61,61 @@ public actor File {
         self.remoteID = fileResult.id
     }
 
-    func download() async throws {
+    public func download() async throws {
         guard let remoteID = remoteID else { throw FileError.remoteIdMissing }
         let fileResult = try await graphQLClient.getFile(id: remoteID)
-        let toURL = URL.documentsDirectory.appending(path: "move-single-api").appending(path: "\(remoteID).\(type.fileExtension)")
+        let toURL = URL.documentsDirectory.appending(path: "\(fileStorage.outputDirectory)/\(remoteID).\(type.fileExtension)")
         guard let presignedURLString = fileResult.presignedUrl, let presignedURL = URL(string: presignedURLString) else {
             throw FileError.presignedUrlMalformed
         }
         try await urlSessionClient.download(url: presignedURL, to: toURL)
-        localUrl = toURL
+        localFileName = remoteID
     }
 
-    struct CodableFile: Codable {
+    public struct CodableFile: Codable {
+        let id: UUID
         let type: FileType
-        let localUrl: URL?
+        let localFileName: String?
         let remoteID: String?
+        let staticLocalUrl: URL?
+    }
+
+    public static nonisolated func == (lhs: File, rhs: File) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    public nonisolated func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 
-enum FileType: String, Codable {
+public enum FileType: String, Codable {
     case video
     case preview
     case move
     case fbx
     case usdc
 
-    var fileExtension: String {
+    public var fileExtension: String {
         switch self {
         case .fbx: return "fbx"
         case .move: return "move"
         case .preview: return "mp4"
         case .usdc: return "usdc"
         case .video: return "mp4"
+        }
+    }
+
+    init?(from string: String) {
+        switch string {
+        case "mp4":
+            self = .preview
+        default:
+            if let type = FileType(rawValue: string) {
+                self = type
+            } else {
+                return nil
+            }
         }
     }
 }
