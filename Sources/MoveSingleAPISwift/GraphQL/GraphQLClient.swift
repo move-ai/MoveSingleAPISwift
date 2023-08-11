@@ -37,21 +37,15 @@ protocol GraphQLClient {
 
 final class GraphQLClientImpl: GraphQLClient {
 
-    private let apiKey: String
-    private let environment: GraphQLEnvironment
+    private let apollo: ApolloClient
 
-    private lazy var apollo: ApolloClient = {
+    init(apiKey: String, environment: GraphQLEnvironment = .production) {
         let client = Apollo.URLSessionClient()
         let cache = InMemoryNormalizedCache()
         let store = ApolloStore(cache: cache)
         let provider = NetworkInterceptorProvider(apiKey: apiKey, client: client, store: store)
         let transport = RequestChainNetworkTransport(interceptorProvider: provider, endpointURL: environment.url)
-        return ApolloClient(networkTransport: transport, store: store)
-    }()
-
-    init(apiKey: String, environment: GraphQLEnvironment = .production) {
-        self.apiKey = apiKey
-        self.environment = environment
+        apollo = ApolloClient(networkTransport: transport, store: store)
     }
 
     func createFile(type: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File {
