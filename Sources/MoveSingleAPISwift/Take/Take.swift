@@ -76,11 +76,12 @@ public actor Take: Identifiable, Equatable {
         }
     }
 
-    public init(takeID: String, videoFile: File, moveFile: File) {
+    public init(takeID: String, videoFile: File, moveFile: File, numberOfRetakes: Int = 0) {
         self.id = UUID()
         self.takeID = takeID
         self.videoFile = videoFile
         self.moveFile = moveFile
+        self.numberOfRetakes = numberOfRetakes
     }
 
     public init(from: CodableTake) {
