@@ -34,7 +34,7 @@ final class TakeTests: XCTestCase {
         let moveFile = MoveSingleAPISwift.File(type: .move)
         let take = MoveSingleAPISwift.Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
         await XCTAssertNilAsync(await take.currentJob)
-        try await take.newJob()
+        try await take.createJob()
         await XCTAssertNotNilAsync(await take.currentJob)
     }
 
@@ -43,11 +43,11 @@ final class TakeTests: XCTestCase {
         let moveFile = MoveSingleAPISwift.File(type: .move)
         let take = MoveSingleAPISwift.Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
 
-        try await take.newJob()
+        try await take.createJob()
         let firstJobID = await take.currentJob?.id
         XCTAssertNotNil(firstJobID)
 
-        try await take.newJob()
+        try await take.createJob()
         let secondJobID = await take.currentJob?.id
         XCTAssertNotNil(secondJobID)
 
