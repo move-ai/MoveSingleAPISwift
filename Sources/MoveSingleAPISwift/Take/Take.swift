@@ -108,6 +108,11 @@ public actor Take: Identifiable, Equatable {
         jobs.append(job)
     }
 
+    public func addJob(id: String) {
+        let job = Job(id: id)
+        jobs.append(job)
+    }
+
     public func zip() async throws -> URL {
         var filesToZip = [
             await videoFile.localUrl,

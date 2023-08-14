@@ -27,7 +27,7 @@ public actor Job {
     @Dependency private var graphQLClient: GraphQLClient
 
     public let id: String
-    public var state: Status = .notStarted
+    public var state: Status = .unknown
     public var outputFiles: [FileType: File] = [:]
 
     var description: String {
