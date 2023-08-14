@@ -10,11 +10,17 @@ import XCTest
 
 final class JobTests: XCTestCase {
 
+    override func setUpWithError() throws {
+        DependencyContainer.register(GraphQLClientMock() as GraphQLClient)
+        DependencyContainer.register(URLSessionClientMock() as URLSessionClient)
+        DependencyContainer.register(FileStorageClientMock() as FileStorageClient)
+    }
+
     func testUpdateNotStarted() async throws {
         DependencyContainer.register(GraphQLClientMock(jobState: "NOT STARTED") as GraphQLClient)
         let job = MoveSingleAPISwift.Job(id: UUID().uuidString)
         let oldState = await job.state
-        XCTAssertEqual(oldState, .notStarted)
+        XCTAssertEqual(oldState, .unknown)
         try await job.update()
         let newState = await job.state
         XCTAssertEqual(newState, .notStarted)
@@ -24,7 +30,7 @@ final class JobTests: XCTestCase {
         DependencyContainer.register(GraphQLClientMock(jobState: "RUNNING") as GraphQLClient)
         let job = MoveSingleAPISwift.Job(id: UUID().uuidString)
         let oldState = await job.state
-        XCTAssertEqual(oldState, .notStarted)
+        XCTAssertEqual(oldState, .unknown)
         try await job.update()
         let newState = await job.state
         XCTAssertEqual(newState, .started)
@@ -34,7 +40,7 @@ final class JobTests: XCTestCase {
         DependencyContainer.register(GraphQLClientMock(jobState: "FAILED") as GraphQLClient)
         let job = MoveSingleAPISwift.Job(id: UUID().uuidString)
         let oldState = await job.state
-        XCTAssertEqual(oldState, .notStarted)
+        XCTAssertEqual(oldState, .unknown)
         try await job.update()
         let newState = await job.state
         XCTAssertEqual(newState, .failed)
@@ -44,7 +50,7 @@ final class JobTests: XCTestCase {
         DependencyContainer.register(GraphQLClientMock(jobState: "FINISHED") as GraphQLClient)
         let job = MoveSingleAPISwift.Job(id: UUID().uuidString)
         let oldState = await job.state
-        XCTAssertEqual(oldState, .notStarted)
+        XCTAssertEqual(oldState, .unknown)
         try await job.update()
         let newState = await job.state
         XCTAssertEqual(newState, .finished)
@@ -54,7 +60,7 @@ final class JobTests: XCTestCase {
         DependencyContainer.register(GraphQLClientMock(jobState: "NOT YET DEFINED") as GraphQLClient)
         let job = MoveSingleAPISwift.Job(id: UUID().uuidString)
         let oldState = await job.state
-        XCTAssertEqual(oldState, .notStarted)
+        XCTAssertEqual(oldState, .unknown)
         try await job.update()
         let newState = await job.state
         XCTAssertEqual(newState, .unknown)
