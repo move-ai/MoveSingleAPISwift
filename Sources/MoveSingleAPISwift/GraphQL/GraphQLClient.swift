@@ -69,7 +69,7 @@ final class GraphQLClientImpl: GraphQLClient {
 
     func getFile(id: String) async throws -> MoveSingleGraphQL.FileQuery.Data.File {
         return try await withCheckedThrowingContinuation { continuation in
-            apollo.fetch(query: MoveSingleGraphQL.FileQuery(fileId: id)) { result in
+            apollo.fetch(query: MoveSingleGraphQL.FileQuery(fileId: id), cachePolicy: .fetchIgnoringCacheCompletely) { result in
                 switch result {
                 case .success(let result):
                     if let file = result.data?.file {
@@ -107,7 +107,7 @@ final class GraphQLClientImpl: GraphQLClient {
 
     func getTake(id: String) async throws -> MoveSingleGraphQL.TakeQuery.Data.Take {
         return try await withCheckedThrowingContinuation { continuation in
-            apollo.fetch(query: MoveSingleGraphQL.TakeQuery(takeId: id)) { result in
+            apollo.fetch(query: MoveSingleGraphQL.TakeQuery(takeId: id), cachePolicy: .fetchIgnoringCacheCompletely) { result in
                 switch result {
                 case .success(let result):
                     if let take = result.data?.take {
@@ -145,9 +145,10 @@ final class GraphQLClientImpl: GraphQLClient {
 
     func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job {
         return try await withCheckedThrowingContinuation { continuation in
-            apollo.fetch(query: MoveSingleGraphQL.JobQuery(jobId: id)) { result in
+            apollo.fetch(query: MoveSingleGraphQL.JobQuery(jobId: id), cachePolicy: .fetchIgnoringCacheCompletely) { result in
                 switch result {
                 case .success(let result):
+                    print(result.source)
                     if let job = result.data?.job {
                         continuation.resume(returning: job)
                     } else if let error = result.errors?.first {

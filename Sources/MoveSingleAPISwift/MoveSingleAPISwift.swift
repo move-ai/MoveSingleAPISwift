@@ -24,6 +24,7 @@ public struct Move {
         takeID: String,
         videoURL: URL,
         enhancementData: [EnhancementData]? = nil,
+        numberOfRetakes: Int = 0,
         configuration: Configuration = .default
     ) async throws -> Take {
 
@@ -39,7 +40,7 @@ public struct Move {
         let moveFile = File(type: .move, localFileName: moveFileName)
         let videoFile = File(type: .video, localFileName: videoURL.deletingPathExtension().lastPathComponent)
 
-        let take = Take(takeID: takeID, videoFile: videoFile, moveFile: moveFile)
+        let take = Take(takeID: takeID, videoFile: videoFile, moveFile: moveFile, numberOfRetakes: numberOfRetakes)
         return take
     }
 }

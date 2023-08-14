@@ -23,7 +23,7 @@ public actor Take: Identifiable, Equatable {
     public var moveFile: File
     private var jobs: [Job] = [] // last job is the current job
 
-    var uploaded: Bool {
+    public var uploaded: Bool {
         get async {
             let videoFileRemoteId = await videoFile.remoteID
             let moveFileRemoteId = await moveFile.remoteID
@@ -76,11 +76,12 @@ public actor Take: Identifiable, Equatable {
         }
     }
 
-    public init(takeID: String, videoFile: File, moveFile: File) {
+    public init(takeID: String, videoFile: File, moveFile: File, numberOfRetakes: Int = 0) {
         self.id = UUID()
         self.takeID = takeID
         self.videoFile = videoFile
         self.moveFile = moveFile
+        self.numberOfRetakes = numberOfRetakes
     }
 
     public init(from: CodableTake) {
@@ -95,14 +96,19 @@ public actor Take: Identifiable, Equatable {
     public func upload() async throws {
         try await self.videoFile.upload()
         try await self.moveFile.upload()
-        guard let videoFileID = await videoFile.remoteID, let moveFileID = await moveFile.remoteID else {
+        try await self.createTake()
+    }
+
+    public func createTake() async throws {
+        guard let videoFileID = await videoFile.remoteID,
+              let moveFileID = await moveFile.remoteID else {
             throw TakeError.filesNotUploaded
         }
         let takeResult = try await graphQLClient.createTake(videoFileId: videoFileID, moveFileId: moveFileID)
         takeID = takeResult.id
     }
 
-    public func newJob() async throws {
+    public func createJob() async throws {
         let jobResult = try await graphQLClient.createJob(takeId: takeID)
         let job = Job(id: jobResult.id)
         jobs.append(job)
