@@ -11,12 +11,13 @@ Import the framework in your project:
 import MoveSingleAPISwift
 ```
 
-[Create an MoveSingleAPI key](https://move.ai) and add it to your configuration:
+[Create a MoveSingleAPI key](https://move.ai) and add it to your configuration:
 ```swift
-let move = Move(apiKey: "TOKEN")`
+let move = Move(apiKey: "TOKEN")
 ```
 
 ### Create simple Take
+Takes are a way to define a recording session. A single take can be associated with a video file and optionally additional enhancement data.
 ```swift
 let take = try await move.createTake(
     takeID: UUID().uuidString, 
@@ -31,7 +32,8 @@ try await take.upload()
 ```
 
 ### Create Job
-Take has to be uploaded. This creates a new job that runs the video through the pipeline to generate the animation.
+Jobs are the processing entity in MoveUGC. By creating a Job, you can initiate the processing for a take. A job can have multiple output types, currently the only output types supported are mp4, usdc and fbx files.
+The Take has to be uploaded to create a Job.
 ```swift
 try await take.createJob()
 ```
@@ -50,7 +52,7 @@ if take.currentJob?.state == .finished {
 Enhancement Data is an optional Array of `EnhancementData` for every frame of the video.
 
 #### CameraDesignData
-`CameraDesignData` holds the internal size and position data of the camera. The information is extracted a given `CMSampleBuffer`.
+`CameraDesignData` holds the internal size and position data of the camera. The information is extracted from a given `CMSampleBuffer`.
 
 ```swift
 let cameraDesignData = CameraDesignData(from: CMSampleBuffer)
@@ -92,7 +94,7 @@ let take = try await move.createTake(
 
 The MIT License (MIT)
 
-Copyright (c) 2023 Move
+Copyright (c) 2023 Move AI
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
