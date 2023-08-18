@@ -10,5 +10,15 @@ class ShareCode: MockObject {
   typealias MockValueCollectionType = Array<Mock<ShareCode>>
 
   struct MockFields {
+    @Field<String>("code") public var code
+  }
+}
+
+extension Mock where O == ShareCode {
+  convenience init(
+    code: String? = nil
+  ) {
+    self.init()
+    _setScalar(code, for: \.code)
   }
 }

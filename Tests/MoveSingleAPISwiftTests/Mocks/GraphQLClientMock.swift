@@ -54,6 +54,13 @@ class GraphQLClientMock: GraphQLClient {
         let model = MoveSingleGraphQL.CreateJobMutation.Data.Job.from(mock)
         return model
     }
+	
+	func generateShareCode(id: String) async throws -> MoveSingleGraphQL.GenerateShareCodeMutation.Data.ShareCode {
+		let mock = Mock<ShareCode>()
+		mock.code = "12345678"
+		let model = MoveSingleGraphQL.GenerateShareCodeMutation.Data.ShareCode.from(mock)
+		return model
+	}
 
     func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job {
         

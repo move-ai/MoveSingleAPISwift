@@ -71,6 +71,12 @@ public actor File: Equatable, Hashable {
         try await urlSessionClient.download(url: presignedURL, to: toURL)
         localFileName = remoteID
     }
+	
+	public func generateShareCode() async throws -> String {
+		guard let remoteID = remoteID else { throw FileError.remoteIdMissing }
+		let shareCode = try await graphQLClient.generateShareCode(id: remoteID)
+		return shareCode.code
+	}
 
     public struct CodableFile: Codable {
         let id: UUID

@@ -33,6 +33,7 @@ protocol GraphQLClient {
     func getTake(id: String) async throws -> MoveSingleGraphQL.TakeQuery.Data.Take
     func createJob(takeId: String) async throws -> MoveSingleGraphQL.CreateJobMutation.Data.Job
     func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job
+	func generateShareCode(id: String) async throws -> MoveSingleGraphQL.GenerateShareCodeMutation.Data.ShareCode
 }
 
 final class GraphQLClientImpl: GraphQLClient {
@@ -162,4 +163,23 @@ final class GraphQLClientImpl: GraphQLClient {
             }
         }
     }
+	
+	func generateShareCode(id: String) async throws -> MoveSingleGraphQL.GenerateShareCodeMutation.Data.ShareCode {
+		return try await withCheckedThrowingContinuation { continuation in
+			apollo.perform(mutation: MoveSingleGraphQL.GenerateShareCodeMutation(fileId: id)) { result in
+				switch result {
+				case .success(let result):
+					if let job = result.data?.shareCode {
+						continuation.resume(returning: job)
+					} else if let error = result.errors?.first {
+						continuation.resume(throwing: error)
+					} else {
+						continuation.resume(throwing: GraphQLClientError.noDataFound)
+					}
+				case .failure(let error):
+					continuation.resume(throwing: error)
+				}
+			}
+		}
+	}
 }

@@ -1,0 +1,5 @@
+mutation GenerateShareCode($fileId: String!) {
+    shareCode: generateShareCode(fileId: $fileId) {
+        code
+    }
+}
