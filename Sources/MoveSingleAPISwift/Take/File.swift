@@ -74,7 +74,7 @@ public actor File: Equatable, Hashable {
 	
 	public func generateShareCode() async throws -> String {
 		guard let remoteID = remoteID else { throw FileError.remoteIdMissing }
-		let shareCode = try await graphQLClient.generateShareCode(id: remoteID)
+		let shareCode = try await graphQLClient.generateShareCode(fileId: remoteID)
 		return shareCode.code
 	}
 
