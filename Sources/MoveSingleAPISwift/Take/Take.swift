@@ -126,6 +126,10 @@ public actor Take: Identifiable, Equatable {
         return exportZipURL
     }
 
+    public func add(job: Job) {
+        jobs.append(job)
+    }
+
     public struct CodableTake: Codable {
         let id: UUID
         let takeID: String
