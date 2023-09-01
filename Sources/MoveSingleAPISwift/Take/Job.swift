@@ -27,8 +27,8 @@ public actor Job {
     @Dependency private var graphQLClient: GraphQLClient
 
     public let id: String
-    public var state: Status = .unknown
-    public var outputFiles: [FileType: File] = [:]
+    public var state: Status
+    public var outputFiles: [FileType: File]
 
     var description: String {
         "Job(id: \(id), state: \(state), outputFiles: \(outputFiles))"
@@ -44,8 +44,10 @@ public actor Job {
         }
     }
 
-    init(id: String) {
+    public init(id: String, state: Status = .unknown, outputFiles: [FileType: File] = [:]) {
         self.id = id
+        self.state = state
+        self.outputFiles = outputFiles
     }
 
     public init(from: CodableJob) {
