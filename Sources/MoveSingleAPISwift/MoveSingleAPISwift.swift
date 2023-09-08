@@ -25,7 +25,8 @@ public struct Move {
         videoURL: URL,
         enhancementData: [EnhancementData]? = nil,
         numberOfRetakes: Int = 0,
-        configuration: Configuration = .default
+        configuration: Configuration = .default,
+        rotated: Bool
     ) async throws -> Take {
 
         var enhancementDataUnwrapped: [EnhancementData] = []
@@ -40,7 +41,8 @@ public struct Move {
         let moveFile = File(type: .move, localFileName: moveFileName)
         let videoFile = File(type: .video, localFileName: videoURL.deletingPathExtension().lastPathComponent)
 
-        let take = Take(takeID: takeID, videoFile: videoFile, moveFile: moveFile, numberOfRetakes: numberOfRetakes)
+        let takeMetadata = TakeMetadata(camera: configuration.camera, rotated: rotated)
+        let take = Take(takeID: takeID, videoFile: videoFile, moveFile: moveFile, metadata: takeMetadata, numberOfRetakes: numberOfRetakes)
         return take
     }
 }

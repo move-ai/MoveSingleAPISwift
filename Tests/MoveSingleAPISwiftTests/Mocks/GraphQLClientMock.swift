@@ -34,7 +34,7 @@ class GraphQLClientMock: GraphQLClient {
         return model
     }
 
-    func createTake(videoFileId: String, moveFileId: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take {
+    func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take {
         let mock = Mock<Take>()
         mock.id = UUID().uuidString
         let model = MoveSingleGraphQL.CreateTakeMutation.Data.Take.from(mock)

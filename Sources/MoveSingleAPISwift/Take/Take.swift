@@ -10,6 +10,12 @@ import Zip
 
 enum TakeError: Error {
     case filesNotUploaded
+    case noMetadata
+}
+
+public struct TakeMetadata: Codable {
+    let camera: Configuration.Camera?
+    let rotated: Bool?
 }
 
 public actor Take: Identifiable, Equatable {
@@ -21,6 +27,7 @@ public actor Take: Identifiable, Equatable {
     public var numberOfRetakes: Int = 0
     public var videoFile: File
     public var moveFile: File
+    public var metadata: TakeMetadata?
     private var jobs: [Job] = [] // last job is the current job
 
     public var uploaded: Bool {
@@ -71,17 +78,19 @@ public actor Take: Identifiable, Equatable {
                 numberOfRetakes: numberOfRetakes,
                 videoFile: await videoFile.codable,
                 moveFile: await moveFile.codable,
+                metadata: metadata,
                 jobs: codableJobs
             )
         }
     }
 
-    public init(takeID: String, videoFile: File, moveFile: File, numberOfRetakes: Int = 0) {
+    public init(takeID: String, videoFile: File, moveFile: File, metadata: TakeMetadata, numberOfRetakes: Int = 0) {
         self.id = UUID()
         self.takeID = takeID
         self.videoFile = videoFile
         self.moveFile = moveFile
         self.numberOfRetakes = numberOfRetakes
+        self.metadata = metadata
     }
 
     public init(from: CodableTake) {
@@ -104,7 +113,12 @@ public actor Take: Identifiable, Equatable {
               let moveFileID = await moveFile.remoteID else {
             throw TakeError.filesNotUploaded
         }
-        let takeResult = try await graphQLClient.createTake(videoFileId: videoFileID, moveFileId: moveFileID)
+        
+        guard let metadata = metadata?.toJSON() else {
+            throw TakeError.noMetadata
+        }
+        
+        let takeResult = try await graphQLClient.createTake(videoFileId: videoFileID, moveFileId: moveFileID, metadata: metadata)
         takeID = takeResult.id
     }
 
@@ -136,6 +150,7 @@ public actor Take: Identifiable, Equatable {
         let numberOfRetakes: Int
         let videoFile: File.CodableFile
         let moveFile: File.CodableFile
+        let metadata: TakeMetadata?
         let jobs: [Job.CodableJob]
     }
 
@@ -143,5 +158,3 @@ public actor Take: Identifiable, Equatable {
         lhs.id == rhs.id
     }
 }
-
-

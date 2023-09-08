@@ -29,7 +29,7 @@ public enum GraphQLEnvironment {
 protocol GraphQLClient {
     func createFile(type: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File
     func getFile(id: String) async throws -> MoveSingleGraphQL.FileQuery.Data.File
-    func createTake(videoFileId: String, moveFileId: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take
+    func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take
     func getTake(id: String) async throws -> MoveSingleGraphQL.TakeQuery.Data.Take
     func createJob(takeId: String) async throws -> MoveSingleGraphQL.CreateJobMutation.Data.Job
     func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job
@@ -87,9 +87,9 @@ final class GraphQLClientImpl: GraphQLClient {
         }
     }
 
-    func createTake(videoFileId: String, moveFileId: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take {
+    func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take {
         return try await withCheckedThrowingContinuation { continuation in
-            apollo.perform(mutation: MoveSingleGraphQL.CreateTakeMutation(videoFileId: videoFileId, moveFileId: moveFileId)) { result in
+            apollo.perform(mutation: MoveSingleGraphQL.CreateTakeMutation(videoFileId: videoFileId, moveFileId: moveFileId, metadata: metadata)) { result in
                 switch result {
                 case .success(let result):
                     if let take = result.data?.take {
