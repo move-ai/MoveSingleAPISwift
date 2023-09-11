@@ -97,6 +97,10 @@ public actor Take: Identifiable, Equatable {
         try await self.moveFile.upload()
         try await self.createTake()
     }
+    
+    public func updateMetadata(_ metadata: [String: AnyHashable]?) async {
+        self.metadata = metadata
+    }
 
     public func createTake() async throws {
         guard let videoFileID = await videoFile.remoteID,
