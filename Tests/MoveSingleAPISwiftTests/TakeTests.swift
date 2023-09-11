@@ -15,11 +15,22 @@ final class TakeTests: XCTestCase {
         DependencyContainer.register(URLSessionClientMock() as URLSessionClient)
         DependencyContainer.register(FileStorageClientMock() as FileStorageClient)
     }
+    
+    func testCreatingTake() async throws {
+        let videoFile = MoveSingleAPISwift.File(type: .video, localFileName: "ABC")
+        let moveFile = MoveSingleAPISwift.File(type: .move, localFileName: "ABC")
+        let take = MoveSingleAPISwift.Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile, metadata: ["_move_one_camera": "front"])
+        let takeCodable = await take.codable
+        let recreatedTake = MoveSingleAPISwift.Take(from: takeCodable)
+        
+        let metadata = await recreatedTake.metadata
+        XCTAssertEqual(metadata?["_move_one_camera"], "front")
+    }
 
     func testUpload() async throws {
         let videoFile = MoveSingleAPISwift.File(type: .video, localFileName: "ABC")
         let moveFile = MoveSingleAPISwift.File(type: .move, localFileName: "ABC")
-        let take = MoveSingleAPISwift.Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
+        let take = MoveSingleAPISwift.Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile, metadata: [:])
         let oldTakeID = await take.takeID
         try await take.upload()
         let uploaded = await take.uploaded
@@ -32,7 +43,7 @@ final class TakeTests: XCTestCase {
     func testAddOneJob() async throws {
         let videoFile = MoveSingleAPISwift.File(type: .video)
         let moveFile = MoveSingleAPISwift.File(type: .move)
-        let take = MoveSingleAPISwift.Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
+        let take = MoveSingleAPISwift.Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile, metadata: [:])
         await XCTAssertNilAsync(await take.currentJob)
         try await take.createJob()
         await XCTAssertNotNilAsync(await take.currentJob)
@@ -41,7 +52,7 @@ final class TakeTests: XCTestCase {
     func testAddTwoJobs() async throws {
         let videoFile = MoveSingleAPISwift.File(type: .video)
         let moveFile = MoveSingleAPISwift.File(type: .move)
-        let take = MoveSingleAPISwift.Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile)
+        let take = MoveSingleAPISwift.Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile, metadata: [:])
 
         try await take.createJob()
         let firstJobID = await take.currentJob?.id

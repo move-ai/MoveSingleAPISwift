@@ -24,8 +24,8 @@ public struct Move {
         takeID: String,
         videoURL: URL,
         enhancementData: [EnhancementData]? = nil,
-        numberOfRetakes: Int = 0,
-        configuration: Configuration = .default
+        configuration: Configuration = .default,
+        metadata: [String: AnyHashable] = [:]
     ) async throws -> Take {
 
         var enhancementDataUnwrapped: [EnhancementData] = []
@@ -39,8 +39,11 @@ public struct Move {
         let moveFileName = try await fileStorage.saveMove(protobufData)
         let moveFile = File(type: .move, localFileName: moveFileName)
         let videoFile = File(type: .video, localFileName: videoURL.deletingPathExtension().lastPathComponent)
-
-        let take = Take(takeID: takeID, videoFile: videoFile, moveFile: moveFile, numberOfRetakes: numberOfRetakes)
+        
+        var metadata = metadata
+        metadata["_move_one_camera"] = configuration.camera.rawValue
+        
+        let take = Take(takeID: takeID, videoFile: videoFile, moveFile: moveFile, metadata: metadata)
         return take
     }
 }

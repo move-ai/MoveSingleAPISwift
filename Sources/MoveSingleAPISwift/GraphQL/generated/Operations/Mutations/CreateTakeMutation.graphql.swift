@@ -8,23 +8,27 @@ extension MoveSingleGraphQL {
     static let operationName: String = "CreateTake"
     static let operationDocument: ApolloAPI.OperationDocument = .init(
       definition: .init(
-        #"mutation CreateTake($videoFileId: String!, $moveFileId: String!) { take: createTake( videoFileId: $videoFileId additionalFileIds: [{key: MOVE, fileId: $moveFileId}] ) { __typename id } }"#
+        #"mutation CreateTake($videoFileId: String!, $moveFileId: String!, $metadata: AWSJSON!) { take: createTake( videoFileId: $videoFileId additionalFileIds: [{key: MOVE, fileId: $moveFileId}] metadata: $metadata ) { __typename id } }"#
       ))
 
     public var videoFileId: String
     public var moveFileId: String
+    public var metadata: AWSJSON
 
     public init(
       videoFileId: String,
-      moveFileId: String
+      moveFileId: String,
+      metadata: AWSJSON
     ) {
       self.videoFileId = videoFileId
       self.moveFileId = moveFileId
+      self.metadata = metadata
     }
 
     public var __variables: Variables? { [
       "videoFileId": videoFileId,
-      "moveFileId": moveFileId
+      "moveFileId": moveFileId,
+      "metadata": metadata
     ] }
 
     struct Data: MoveSingleGraphQL.SelectionSet {
@@ -38,7 +42,8 @@ extension MoveSingleGraphQL {
           "additionalFileIds": [[
             "key": "MOVE",
             "fileId": .variable("moveFileId")
-          ]]
+          ]],
+          "metadata": .variable("metadata")
         ]),
       ] }
 
