@@ -10,12 +10,6 @@ import Zip
 
 enum TakeError: Error {
     case filesNotUploaded
-    case noMetadata
-}
-
-public struct TakeMetadata: Codable {
-    let camera: Configuration.Camera?
-    let rotated: Bool?
 }
 
 public actor Take: Identifiable, Equatable {
@@ -24,10 +18,9 @@ public actor Take: Identifiable, Equatable {
 
     public nonisolated let id: UUID // needed to be Identifiable
     public var takeID: String // This ID will change when we create a take as we then use the remote takeID
-    public var numberOfRetakes: Int = 0
     public var videoFile: File
     public var moveFile: File
-    public var metadata: TakeMetadata?
+    public var metadata: [String: AnyHashable]?
     private var jobs: [Job] = [] // last job is the current job
 
     public var uploaded: Bool {
@@ -44,7 +37,7 @@ public actor Take: Identifiable, Equatable {
 
     var description: String {
         get async {
-            var string = "\(takeID)\n\(numberOfRetakes)\n\(videoFile)\n\(moveFile)\n"
+            var string = "\(takeID)\n\(videoFile)\n\(moveFile)\n"
             for job in jobs {
                 string.append(await job.description + "\n")
             }
@@ -56,7 +49,6 @@ public actor Take: Identifiable, Equatable {
         get async {
             return """
             takeID: \(takeID)
-            numberOfRetakes: \(numberOfRetakes)
             videoRemoteID: \(await videoFile.remoteID ?? "NA")
             moveRemoteID: \(await moveFile.remoteID ?? "NA")
             jobRemoteID: \(currentJob?.id ?? "NA")
@@ -75,31 +67,29 @@ public actor Take: Identifiable, Equatable {
             return CodableTake(
                 id: id,
                 takeID: takeID,
-                numberOfRetakes: numberOfRetakes,
                 videoFile: await videoFile.codable,
                 moveFile: await moveFile.codable,
-                metadata: metadata,
+                metadata: metadata?.toJSONString(),
                 jobs: codableJobs
             )
         }
     }
 
-    public init(takeID: String, videoFile: File, moveFile: File, metadata: TakeMetadata, numberOfRetakes: Int = 0) {
+    public init(takeID: String, videoFile: File, moveFile: File, metadata: [String: AnyHashable]?) {
         self.id = UUID()
         self.takeID = takeID
         self.videoFile = videoFile
         self.moveFile = moveFile
-        self.numberOfRetakes = numberOfRetakes
         self.metadata = metadata
     }
 
     public init(from: CodableTake) {
         self.id = from.id
         self.takeID = from.takeID
-        self.numberOfRetakes = from.numberOfRetakes
         self.videoFile = File(from: from.videoFile)
         self.moveFile = File(from: from.moveFile)
         self.jobs = from.jobs.map { Job(from: $0) }
+        self.metadata = Dictionary<String, AnyHashable>.convertStringToDictionary(from.metadata)
     }
 
     public func upload() async throws {
@@ -114,11 +104,8 @@ public actor Take: Identifiable, Equatable {
             throw TakeError.filesNotUploaded
         }
         
-        guard let metadata = metadata?.toJSON() else {
-            throw TakeError.noMetadata
-        }
-        
-        let takeResult = try await graphQLClient.createTake(videoFileId: videoFileID, moveFileId: moveFileID, metadata: metadata)
+        let metadataJSONString = metadata?.toJSONString() ?? "{}"
+        let takeResult = try await graphQLClient.createTake(videoFileId: videoFileID, moveFileId: moveFileID, metadata: metadataJSONString)
         takeID = takeResult.id
     }
 
@@ -147,10 +134,9 @@ public actor Take: Identifiable, Equatable {
     public struct CodableTake: Codable {
         let id: UUID
         let takeID: String
-        let numberOfRetakes: Int
         let videoFile: File.CodableFile
         let moveFile: File.CodableFile
-        let metadata: TakeMetadata?
+        let metadata: String?
         let jobs: [Job.CodableJob]
     }
 
