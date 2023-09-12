@@ -22,9 +22,10 @@ final class TakeTests: XCTestCase {
         let take = MoveSingleAPISwift.Take(takeID: UUID().uuidString, videoFile: videoFile, moveFile: moveFile, metadata: ["_move_one_camera": "front"])
         let takeCodable = await take.codable
         let recreatedTake = MoveSingleAPISwift.Take(from: takeCodable)
+        await recreatedTake.updateMetadata(["_move_one_camera": "back"])
         
         let metadata = await recreatedTake.metadata
-        XCTAssertEqual(metadata?["_move_one_camera"], "front")
+        XCTAssertEqual(metadata?["_move_one_camera"], "back")
     }
 
     func testUpload() async throws {
