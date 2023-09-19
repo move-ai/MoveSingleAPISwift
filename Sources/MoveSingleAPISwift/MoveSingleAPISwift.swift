@@ -1,12 +1,14 @@
 import Foundation
 import os
 
-public struct Move {
+public final class Move {
 
-    private let fileStorage: FileStorageClient
+    private var fileStorage: FileStorageClient?
     private let logger = Logger()
 
-    public init(
+    public init() { }
+
+    public func configure(
         apiKey: String,
         environment: GraphQLEnvironment = .production,
         outputDirectory: String = ""
@@ -17,7 +19,7 @@ public struct Move {
             environment: environment
         ) as GraphQLClient)
         DependencyContainer.register(URLSessionClientImpl() as URLSessionClient)
-        DependencyContainer.register(fileStorage)
+        DependencyContainer.register(fileStorage!)
     }
 
     public func createTake(
@@ -27,7 +29,6 @@ public struct Move {
         configuration: Configuration = .default,
         metadata: [String: AnyHashable] = [:]
     ) async throws -> Take {
-
         var enhancementDataUnwrapped: [EnhancementData] = []
         if let enhancementData = enhancementData {
             enhancementDataUnwrapped = enhancementData
@@ -36,7 +37,7 @@ public struct Move {
         }
 
         let protobufData = try await ProtobufGenerator.generate(from: enhancementDataUnwrapped, config: configuration)
-        let moveFileName = try await fileStorage.saveMove(protobufData)
+        let moveFileName = try await fileStorage?.saveMove(protobufData)
         let moveFile = File(type: .move, localFileName: moveFileName)
         let videoFile = File(type: .video, localFileName: videoURL.deletingPathExtension().lastPathComponent)
         

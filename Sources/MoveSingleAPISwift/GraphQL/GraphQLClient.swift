@@ -39,8 +39,12 @@ protocol GraphQLClient {
 final class GraphQLClientImpl: GraphQLClient {
 
     private let apollo: ApolloClient
+    private var apikey: String
+    private var environment: GraphQLEnvironment
 
     init(apiKey: String, environment: GraphQLEnvironment = .production) {
+        self.apikey = apiKey
+        self.environment = environment
         let client = Apollo.URLSessionClient()
         let cache = InMemoryNormalizedCache()
         let store = ApolloStore(cache: cache)
