@@ -3,23 +3,25 @@ import os
 
 public final class Move {
 
-    private var fileStorage: FileStorageClient?
+    private var fileStorage: FileStorageClient
+    private var graphQLClient: GraphQLClient
     private let logger = Logger()
 
-    public init() { }
+    public init() {
+        fileStorage = FileStorageClientImpl()
+        DependencyContainer.register(fileStorage)
+        graphQLClient = GraphQLClientImpl()
+        DependencyContainer.register(graphQLClient)
+        DependencyContainer.register(URLSessionClientImpl() as URLSessionClient)
+    }
 
     public func configure(
         apiKey: String,
         environment: GraphQLEnvironment = .production,
         outputDirectory: String = ""
     ) {
-        self.fileStorage = FileStorageClientImpl(outputDirectory: outputDirectory)
-        DependencyContainer.register(GraphQLClientImpl(
-            apiKey: apiKey,
-            environment: environment
-        ) as GraphQLClient)
-        DependencyContainer.register(URLSessionClientImpl() as URLSessionClient)
-        DependencyContainer.register(fileStorage!)
+        fileStorage.configure(outputDirectory: outputDirectory)
+        graphQLClient.configure(apiKey: apiKey, environment: environment)
     }
 
     public func createTake(
@@ -37,7 +39,7 @@ public final class Move {
         }
 
         let protobufData = try await ProtobufGenerator.generate(from: enhancementDataUnwrapped, config: configuration)
-        let moveFileName = try await fileStorage?.saveMove(protobufData)
+        let moveFileName = try await fileStorage.saveMove(protobufData)
         let moveFile = File(type: .move, localFileName: moveFileName)
         let videoFile = File(type: .video, localFileName: videoURL.deletingPathExtension().lastPathComponent)
         

@@ -9,14 +9,15 @@ import Foundation
 
 protocol FileStorageClient {
     var outputDirectory: String { get }
+    func configure(outputDirectory: String)
     func saveMove(_ data: Data) async throws -> String
 }
 
 final class FileStorageClientImpl: FileStorageClient {
 
-    let outputDirectory: String
+    private(set) var outputDirectory: String = ""
 
-    init(outputDirectory: String = "") {
+    func configure(outputDirectory: String) {
         self.outputDirectory = outputDirectory
     }
 
