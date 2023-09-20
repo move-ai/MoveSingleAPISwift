@@ -19,6 +19,11 @@ class GraphQLClientMock: GraphQLClient {
         self.jobState = jobState
     }
 
+    func registerForNotifications(clientID: String) async throws -> MoveSingleAPISwift.MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint {
+        let mock = Mock<WebhookEndpoint>()
+        return MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint.from(mock)
+    }
+
     func createFile(type: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File {
         let mock = Mock<File>()
         mock.id = UUID().uuidString

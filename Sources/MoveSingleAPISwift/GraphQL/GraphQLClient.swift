@@ -25,10 +25,18 @@ public enum GraphQLEnvironment {
             return URL(string: "https://api.move.ai/ugc/graphql")!
         }
     }
+
+    var webhookEndpointURLString: String {
+        switch self {
+        case .green: return "https://notifications-test.move.ai/moveone/webhook"
+        case .production: return "https://notifications.move.ai/moveone/webhook"
+        }
+    }
 }
 
 protocol GraphQLClient {
     func configure(apiKey: String, environment: GraphQLEnvironment)
+    func registerForNotifications(clientID: String) async throws -> MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint
     func createFile(type: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File
     func getFile(id: String) async throws -> MoveSingleGraphQL.FileQuery.Data.File
     func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take
@@ -59,6 +67,31 @@ final class GraphQLClientImpl: GraphQLClient {
         let provider = NetworkInterceptorProvider(apiKey: apiKey, client: client, store: store)
         let transport = RequestChainNetworkTransport(interceptorProvider: provider, endpointURL: environment.url)
         apollo = ApolloClient(networkTransport: transport, store: store)
+    }
+
+    func registerForNotifications(clientID: String) async throws -> MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint {
+        return try await withCheckedThrowingContinuation { continuation in
+            guard let apollo = apollo,
+                  let endpoint = self.environment else { continuation.resume(throwing: GraphQLClientError.notConfigured); return }
+            apollo.perform(mutation: MoveSingleGraphQL.WebhookEndpointMutation(
+                events: ["ugc.job.state.completed"],
+                uid: clientID,
+                url: endpoint.webhookEndpointURLString
+            )) { result in
+                switch result {
+                case .success(let result):
+                    if let webhookEndpoint = result.data?.upsertWebhookEndpoint {
+                        continuation.resume(returning: webhookEndpoint)
+                    } else if let error = result.errors?.first {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume(throwing: GraphQLClientError.noDataFound)
+                    }
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
     }
 
     func createFile(type: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File {
