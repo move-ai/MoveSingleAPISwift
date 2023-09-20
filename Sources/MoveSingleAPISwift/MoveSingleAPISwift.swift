@@ -1,23 +1,27 @@
 import Foundation
 import os
 
-public struct Move {
+public final class Move {
 
-    private let fileStorage: FileStorageClient
+    private var fileStorage: FileStorageClient
+    private var graphQLClient: GraphQLClient
     private let logger = Logger()
 
-    public init(
+    public init() {
+        fileStorage = FileStorageClientImpl()
+        DependencyContainer.register(fileStorage)
+        graphQLClient = GraphQLClientImpl()
+        DependencyContainer.register(graphQLClient)
+        DependencyContainer.register(URLSessionClientImpl() as URLSessionClient)
+    }
+
+    public func configure(
         apiKey: String,
         environment: GraphQLEnvironment = .production,
         outputDirectory: String = ""
     ) {
-        self.fileStorage = FileStorageClientImpl(outputDirectory: outputDirectory)
-        DependencyContainer.register(GraphQLClientImpl(
-            apiKey: apiKey,
-            environment: environment
-        ) as GraphQLClient)
-        DependencyContainer.register(URLSessionClientImpl() as URLSessionClient)
-        DependencyContainer.register(fileStorage)
+        fileStorage.configure(outputDirectory: outputDirectory)
+        graphQLClient.configure(apiKey: apiKey, environment: environment)
     }
 
     public func createTake(
@@ -27,7 +31,6 @@ public struct Move {
         configuration: Configuration = .default,
         metadata: [String: AnyHashable] = [:]
     ) async throws -> Take {
-
         var enhancementDataUnwrapped: [EnhancementData] = []
         if let enhancementData = enhancementData {
             enhancementDataUnwrapped = enhancementData

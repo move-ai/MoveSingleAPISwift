@@ -9,9 +9,12 @@ import Foundation
 @testable import MoveSingleAPISwift
 
 class FileStorageClientMock: FileStorageClient {
+
     var outputDirectory: String {
         return ""
     }
+    
+    func configure(outputDirectory: String) { }
 
     func saveMove(_ data: Data) async throws -> String {
         return UUID().uuidString

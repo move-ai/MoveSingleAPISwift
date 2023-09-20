@@ -14,13 +14,15 @@ enum TakeError: Error {
 
 public actor Take: Identifiable, Equatable {
 
+    public typealias Metadata = [String: AnyHashable]
+
     @Dependency private var graphQLClient: GraphQLClient
 
     public nonisolated let id: UUID // needed to be Identifiable
     public var takeID: String // This ID will change when we create a take as we then use the remote takeID
     public var videoFile: File
     public var moveFile: File
-    public var metadata: [String: AnyHashable]?
+    public var metadata: Metadata?
     private var jobs: [Job] = [] // last job is the current job
 
     public var uploaded: Bool {
@@ -38,6 +40,9 @@ public actor Take: Identifiable, Equatable {
     var description: String {
         get async {
             var string = "\(takeID)\n\(videoFile)\n\(moveFile)\n"
+            if let metadata = metadata {
+                string.append("\(metadata)\n")
+            }
             for job in jobs {
                 string.append(await job.description + "\n")
             }
@@ -53,6 +58,7 @@ public actor Take: Identifiable, Equatable {
             moveRemoteID: \(await moveFile.remoteID ?? "NA")
             jobRemoteID: \(currentJob?.id ?? "NA")
             jobState: \(await currentJob?.state.rawValue ?? "NA")
+            metadata: \(metadata?.toJSONString() ?? "NA")
             """
         }
     }
@@ -96,10 +102,6 @@ public actor Take: Identifiable, Equatable {
         try await self.videoFile.upload()
         try await self.moveFile.upload()
         try await self.createTake()
-    }
-    
-    public func updateMetadata(_ metadata: [String: AnyHashable]?) async {
-        self.metadata = metadata
     }
 
     public func createTake() async throws {
