@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  CameraDesignData.swift
 //  
 //
 //  Created by Felix Fischer on 08/08/2023.
@@ -28,6 +28,12 @@ public struct CameraDesignData {
             intrinsicMatrix = camData.withUnsafeBytes { $0.pointee }
         }
 
+        self.intrinsicMatrix = intrinsicMatrix
+    }
+    
+    public init(width: Int, height: Int, intrinsicMatrix: matrix_float3x3) {
+        self.width = width
+        self.height = height
         self.intrinsicMatrix = intrinsicMatrix
     }
 }

@@ -53,6 +53,8 @@ final class ProtobufGenerator {
         }
         if let extrinsicMatrix = enhancementData.depthSensorData?.depthData.cameraCalibrationData?.extrinsicMatrix {
             camera.extrinsics = extrinsics(from: extrinsicMatrix)
+        } else if let extrinsicMatrix = enhancementData.cameraPositionData?.extrinsicMatrix {
+            camera.extrinsics = extrinsics(from: extrinsicMatrix)
         }
         return camera
     }
