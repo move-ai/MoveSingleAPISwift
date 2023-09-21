@@ -50,8 +50,10 @@ public final class Move {
         return take
     }
 
-    public func registerForNotifications(clientID: String) async throws {
-        let webhookEndpoint = try await graphQLClient.registerForNotifications(clientID: clientID)
+    public func registerForNotifications(clientID: String, events: [NotificationEvents]) async throws {
+        let webhookEndpoint = try await graphQLClient.registerForNotifications(clientID: clientID, events: events)
         print("\(webhookEndpoint.events ?? [])")
     }
+
+    
 }

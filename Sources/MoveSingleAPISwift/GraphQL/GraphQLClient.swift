@@ -36,7 +36,7 @@ public enum GraphQLEnvironment {
 
 protocol GraphQLClient {
     func configure(apiKey: String, environment: GraphQLEnvironment)
-    func registerForNotifications(clientID: String) async throws -> MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint
+    func registerForNotifications(clientID: String, events: [NotificationEvents]) async throws -> MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint
     func createFile(type: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File
     func getFile(id: String) async throws -> MoveSingleGraphQL.FileQuery.Data.File
     func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take
@@ -69,12 +69,14 @@ final class GraphQLClientImpl: GraphQLClient {
         apollo = ApolloClient(networkTransport: transport, store: store)
     }
 
-    func registerForNotifications(clientID: String) async throws -> MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint {
+    func registerForNotifications(clientID: String, events: [NotificationEvents]) async throws -> MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint {
         return try await withCheckedThrowingContinuation { continuation in
             guard let apollo = apollo,
-                  let endpoint = self.environment else { continuation.resume(throwing: GraphQLClientError.notConfigured); return }
+                  let endpoint = self.environment
+            else { continuation.resume(throwing: GraphQLClientError.notConfigured); return }
+
             apollo.perform(mutation: MoveSingleGraphQL.WebhookEndpointMutation(
-                events: ["ugc.job.state.completed"],
+                events: .some(events.map { $0.rawValue }),
                 uid: clientID,
                 url: endpoint.webhookEndpointURLString
             )) { result in

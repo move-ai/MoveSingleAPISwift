@@ -19,7 +19,7 @@ class GraphQLClientMock: GraphQLClient {
         self.jobState = jobState
     }
 
-    func registerForNotifications(clientID: String) async throws -> MoveSingleAPISwift.MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint {
+    func registerForNotifications(clientID: String, events: [NotificationEvents]) async throws -> MoveSingleAPISwift.MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint {
         let mock = Mock<WebhookEndpoint>()
         return MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint.from(mock)
     }
