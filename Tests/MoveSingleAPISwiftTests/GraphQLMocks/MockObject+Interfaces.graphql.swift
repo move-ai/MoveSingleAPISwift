@@ -2,7 +2,7 @@
 // This file was automatically generated and should not be edited.
 
 import ApolloTestSupport
-import MoveSingleAPISwift
+@testable import MoveSingleAPISwift
 
 extension MockObject {
   typealias Identifier = Interface

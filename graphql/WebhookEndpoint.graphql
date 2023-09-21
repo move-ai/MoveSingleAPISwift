@@ -1,0 +1,9 @@
+mutation WebhookEndpoint($events: [String!], $uid: String!, $url: String!) {
+    upsertWebhookEndpoint(
+        url: $url,
+        uid: $uid,
+        events: $events
+    ) {
+        events
+    }
+}

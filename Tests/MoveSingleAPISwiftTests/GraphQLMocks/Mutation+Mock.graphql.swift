@@ -14,6 +14,7 @@ class Mutation: MockObject {
     @Field<Job>("job") public var job
     @Field<ShareCode>("shareCode") public var shareCode
     @Field<Take>("take") public var take
+    @Field<WebhookEndpoint>("upsertWebhookEndpoint") public var upsertWebhookEndpoint
   }
 }
 
@@ -22,12 +23,14 @@ extension Mock where O == Mutation {
     file: Mock<File>? = nil,
     job: Mock<Job>? = nil,
     shareCode: Mock<ShareCode>? = nil,
-    take: Mock<Take>? = nil
+    take: Mock<Take>? = nil,
+    upsertWebhookEndpoint: Mock<WebhookEndpoint>? = nil
   ) {
     self.init()
     _setEntity(file, for: \.file)
     _setEntity(job, for: \.job)
     _setEntity(shareCode, for: \.shareCode)
     _setEntity(take, for: \.take)
+    _setEntity(upsertWebhookEndpoint, for: \.upsertWebhookEndpoint)
   }
 }

@@ -16,7 +16,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         .package(
             url: "https://github.com/apollographql/apollo-ios.git",
-            .upToNextMajor(from: "1.0.0")
+            .upToNextMajor(from: "1.5.0")
         ),
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.22.1"),
         .package(url: "https://github.com/marmelroy/Zip.git", from: "2.1.0")
