@@ -25,6 +25,8 @@ final class ProtobufGenerator {
 
                 if let extrinsicMatrix = enhancementDataFrame.depthSensorData?.depthData.cameraCalibrationData?.extrinsicMatrix {
                     odometryInstance.coordinateSystem.transform = transform(from: extrinsicMatrix)
+                } else if let extrinsicMatrix = enhancementDataFrame.cameraPositionData?.extrinsicMatrix {
+                    odometryInstance.coordinateSystem.transform = transform(from: extrinsicMatrix)
                 }
 
                 if config.includeIMUData, let cameraPositionData = enhancementDataFrame.cameraPositionData {
@@ -52,8 +54,6 @@ final class ProtobufGenerator {
             camera.intrinsics = intrinsic(from: cameraDesignData)
         }
         if let extrinsicMatrix = enhancementData.depthSensorData?.depthData.cameraCalibrationData?.extrinsicMatrix {
-            camera.extrinsics = extrinsics(from: extrinsicMatrix)
-        } else if let extrinsicMatrix = enhancementData.cameraPositionData?.extrinsicMatrix {
             camera.extrinsics = extrinsics(from: extrinsicMatrix)
         }
         return camera
