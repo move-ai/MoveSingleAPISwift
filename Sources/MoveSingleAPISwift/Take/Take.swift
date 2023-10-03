@@ -137,6 +137,19 @@ public actor Take: Identifiable, Equatable {
         jobs.append(job)
     }
 
+    public func reset() async throws {
+        takeID = UUID().uuidString
+        await videoFile.removeUpload()
+        await moveFile.removeUpload()
+
+        for job in jobs {
+            for file in await job.outputFiles {
+                try await file.value.removeDownload()
+            }
+        }
+        jobs.removeAll()
+    }
+
     public struct CodableTake: Codable {
         let id: UUID
         let takeID: String

@@ -78,6 +78,17 @@ public actor File: Equatable, Hashable {
         return shareCode.code
     }
 
+    public func removeDownload() throws {
+        if let localUrl = localUrl, FileManager.default.fileExists(atPath: localUrl.path()) {
+            try FileManager.default.removeItem(at: localUrl)
+        }
+        localFileName = nil
+    }
+
+    public func removeUpload() {
+        remoteID = nil
+    }
+
     public struct CodableFile: Codable {
         let id: UUID
         let type: FileType
