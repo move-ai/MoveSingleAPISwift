@@ -33,6 +33,7 @@ final class ProtobufGenerator {
                     odometryInstance.imu = imu(from: cameraPositionData, config: config)
                 }
 
+                odometryInstance.timestamp = Float(enhancementDataFrame.cameraPositionData?.arCameraStatus ?? 0)
                 depthSequence.camera.odometry.trajectory.append(odometryInstance)
 
                 if config.includeLidarData, let depthData = enhancementDataFrame.depthSensorData?.depthData {
