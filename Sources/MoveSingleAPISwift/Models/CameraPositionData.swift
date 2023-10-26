@@ -14,12 +14,15 @@ public struct CameraPositionData {
     let magnetometerData: CMMagnetometerData?
     let deviceMotion: CMDeviceMotion?
     let extrinsicMatrix: matrix_float4x3?
+    let arCameraStatus: Int
 
-    public init(gyroData: CMGyroData?, accelerometerData: CMAccelerometerData?, magnetometerData: CMMagnetometerData?, deviceMotion: CMDeviceMotion?, extrinsicMatrix: matrix_float4x3?) {
+    public init(gyroData: CMGyroData?, accelerometerData: CMAccelerometerData?, magnetometerData: CMMagnetometerData?, deviceMotion: CMDeviceMotion?, extrinsicMatrix: matrix_float4x3?,
+                arCameraStatus: Int) {
         self.gyroData = gyroData
         self.accelerometerData = accelerometerData
         self.magnetometerData = magnetometerData
         self.deviceMotion = deviceMotion
         self.extrinsicMatrix = extrinsicMatrix
+        self.arCameraStatus = arCameraStatus
     }
 }
