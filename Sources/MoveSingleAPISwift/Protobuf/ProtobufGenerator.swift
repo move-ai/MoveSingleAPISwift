@@ -149,7 +149,8 @@ final class ProtobufGenerator {
         transform.translation.z = mat[3][2]
 
         transform.orientation = Orientation()
-        transform.orientation.rotationValues = [quat.x, quat.y, quat.z, quat.w]
+        let sum = [quat.x, quat.y, quat.z, quat.w].reduce(0, +)
+        transform.orientation.rotationValues = [quat.x / sum, quat.y / sum, quat.z / sum, quat.w / sum]
 
         return transform
     }
