@@ -17,6 +17,7 @@ extension CameraPositionData {
             magnetometerData: CMMagnetometerDataMock(),
             deviceMotion: CMDeviceMotionMock(), 
             extrinsicMatrix: nil,
+            viewMatrix: nil,
             arCameraStatus: 0
         )
     }()

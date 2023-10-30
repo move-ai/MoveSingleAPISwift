@@ -15,9 +15,11 @@ final class ProtobufGenerator {
         return try await Task {
             var observations = Observations()
             var depthSequence = DepthSequence()
+            var depthSequence1 = DepthSequence()
 
             if let lastEnhancementDataFrame = enhancementData.last {
                 depthSequence.camera = camera(from: lastEnhancementDataFrame, config: config)
+                depthSequence1.camera = camera(from: lastEnhancementDataFrame, config: config)
             }
 
             enhancementData.forEach { enhancementDataFrame in
@@ -35,12 +37,19 @@ final class ProtobufGenerator {
 
                 odometryInstance.timestamp = Float(enhancementDataFrame.cameraPositionData?.arCameraStatus ?? 0)
                 depthSequence.camera.odometry.trajectory.append(odometryInstance)
+                
+                if let viewMatrix = enhancementDataFrame.cameraPositionData?.viewMatrix {
+                    odometryInstance.coordinateSystem.transform = transform(from: viewMatrix)
+                }
+                depthSequence1.camera.odometry.trajectory.append(odometryInstance)
 
                 if config.includeLidarData, let depthData = enhancementDataFrame.depthSensorData?.depthData {
                     depthSequence.frames.append(depthMap(from: depthData))
+                    depthSequence1.frames.append(depthMap(from: depthData))
                 }
             }
             observations.lidars.append(depthSequence)
+            observations.lidars.append(depthSequence1)
 
             let data = try observations.serializedData()
             return data
