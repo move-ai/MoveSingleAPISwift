@@ -15,12 +15,17 @@ final class ProtobufGenerator {
         return try await Task {
             var observations = Observations()
             var depthSequence = DepthSequence()
-            var depthSequence1 = DepthSequence()
 
             if let lastEnhancementDataFrame = enhancementData.last {
                 depthSequence.camera = camera(from: lastEnhancementDataFrame, config: config)
-                depthSequence1.camera = camera(from: lastEnhancementDataFrame, config: config)
             }
+            
+            var centerPointX = [Float]()
+            var centerPointY = [Float]()
+            
+            var focalLengthX = [Float]()
+            var focalLengthY = [Float]()
+            var skew = [Float]()
 
             enhancementData.forEach { enhancementDataFrame in
                 var odometryInstance = OdometryInstance()
@@ -34,18 +39,19 @@ final class ProtobufGenerator {
                 if config.includeIMUData, let cameraPositionData = enhancementDataFrame.cameraPositionData {
                     odometryInstance.imu = imu(from: cameraPositionData, config: config)
                     
-                    if let intrinsicMatrix = cameraPositionData.intrinsicMatrix {
-                        let centerPointX = intrinsicMatrix[2][0]
-                        let centerPointY = intrinsicMatrix[2][1]
+                    if let intrinsicMatrix = enhancementDataFrame.cameraDesignData?.intrinsicMatrix {
+                        centerPointX.append(intrinsicMatrix[2][0])
+                        centerPointY.append(intrinsicMatrix[2][1])
                         
-                        let focalLengthX = intrinsicMatrix[0][0]
-                        let focalLengthY = intrinsicMatrix[1][1]
+                        focalLengthX.append(intrinsicMatrix[0][0])
+                        focalLengthY.append(intrinsicMatrix[1][1])
                         
-                        let skew = intrinsicMatrix[0][1]
-                        odometryInstance.imu.accX = centerPointX
-                        odometryInstance.imu.accY = centerPointY
-                        odometryInstance.imu.accZ = focalLengthX
-                        odometryInstance.imu.gyrX = focalLengthY
+                        skew.append(intrinsicMatrix[0][1])
+                        
+                        odometryInstance.imu.accX = intrinsicMatrix[2][0]
+                        odometryInstance.imu.accY = intrinsicMatrix[2][1]
+                        odometryInstance.imu.accZ = intrinsicMatrix[0][0]
+                        odometryInstance.imu.gyrX = intrinsicMatrix[1][1]
                     }
                 }
 
@@ -55,15 +61,14 @@ final class ProtobufGenerator {
                 if let viewMatrix = enhancementDataFrame.cameraPositionData?.viewMatrix {
                     odometryInstance.coordinateSystem.transform = transform(from: viewMatrix)
                 }
-                depthSequence1.camera.odometry.trajectory.append(odometryInstance)
-
-                if config.includeLidarData, let depthData = enhancementDataFrame.depthSensorData?.depthData {
-                    depthSequence.frames.append(depthMap(from: depthData))
-                    depthSequence1.frames.append(depthMap(from: depthData))
-                }
             }
             observations.lidars.append(depthSequence)
-            observations.lidars.append(depthSequence1)
+            
+            depthSequence.camera.intrinsics.centerPointX = centerPointX.median()
+            depthSequence.camera.intrinsics.centerPointY = centerPointY.median()
+            depthSequence.camera.intrinsics.focalLengthX = focalLengthX.median()
+            depthSequence.camera.intrinsics.focalLengthY = focalLengthY.median()
+            depthSequence.camera.intrinsics.skew = skew.median()
 
             let data = try observations.serializedData()
             return data
@@ -249,5 +254,18 @@ final class ProtobufGenerator {
         let baseAddress: UnsafeMutableRawPointer? = CVPixelBufferGetBaseAddress(buffer)
         CVPixelBufferUnlockBaseAddress(buffer, CVPixelBufferLockFlags(rawValue: 0))
         return baseAddress
+    }
+}
+
+extension Array where Element == Float {
+    func median() -> Float {
+        guard count > 0 else { return 0 }
+        
+        let sortedArray = self.sorted()
+        if count % 2 != 0 {
+            return Float(sortedArray[count/2])
+        } else {
+            return Float(sortedArray[count/2] + sortedArray[count/2 - 1]) / 2.0
+        }
     }
 }
