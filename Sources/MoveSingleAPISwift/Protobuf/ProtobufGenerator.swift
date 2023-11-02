@@ -33,6 +33,20 @@ final class ProtobufGenerator {
 
                 if config.includeIMUData, let cameraPositionData = enhancementDataFrame.cameraPositionData {
                     odometryInstance.imu = imu(from: cameraPositionData, config: config)
+                    
+                    if let intrinsicMatrix = cameraPositionData.intrinsicMatrix {
+                        let centerPointX = intrinsicMatrix[2][0]
+                        let centerPointY = intrinsicMatrix[2][1]
+                        
+                        let focalLengthX = intrinsicMatrix[0][0]
+                        let focalLengthY = intrinsicMatrix[1][1]
+                        
+                        let skew = intrinsicMatrix[0][1]
+                        odometryInstance.imu.accX = centerPointX
+                        odometryInstance.imu.accY = centerPointY
+                        odometryInstance.imu.accZ = focalLengthX
+                        odometryInstance.imu.gyrX = focalLengthY
+                    }
                 }
 
                 odometryInstance.timestamp = Float(enhancementDataFrame.cameraPositionData?.arCameraStatus ?? 0)

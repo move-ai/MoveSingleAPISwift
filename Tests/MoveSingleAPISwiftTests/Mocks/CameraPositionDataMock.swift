@@ -15,7 +15,8 @@ extension CameraPositionData {
             gyroData: CMGyroDataMock(),
             accelerometerData: CMAccelerometerDataMock(),
             magnetometerData: CMMagnetometerDataMock(),
-            deviceMotion: CMDeviceMotionMock(), 
+            deviceMotion: CMDeviceMotionMock(),
+            intrinsicMatrix: nil, 
             extrinsicMatrix: nil,
             viewMatrix: nil,
             arCameraStatus: 0
