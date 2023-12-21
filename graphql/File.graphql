@@ -1,5 +1,5 @@
-mutation CreateFile($type: String!) {
-    file: createFile(type: $type) {
+mutation CreateFile($type: String!, $metadata: AWSJSON!) {
+    file: createFile(type: $type, metadata: $metadata) {
         id
         presignedUrl
     }

@@ -8,16 +8,24 @@ extension MoveSingleGraphQL {
     static let operationName: String = "CreateJob"
     static let operationDocument: ApolloAPI.OperationDocument = .init(
       definition: .init(
-        #"mutation CreateJob($takeId: String!) { job: createJob(takeId: $takeId) { __typename id state } }"#
+        #"mutation CreateJob($takeId: String!, $metadata: AWSJSON!) { job: createJob(takeId: $takeId, metadata: $metadata) { __typename id state } }"#
       ))
 
     public var takeId: String
+    public var metadata: AWSJSON
 
-    public init(takeId: String) {
+    public init(
+      takeId: String,
+      metadata: AWSJSON
+    ) {
       self.takeId = takeId
+      self.metadata = metadata
     }
 
-    public var __variables: Variables? { ["takeId": takeId] }
+    public var __variables: Variables? { [
+      "takeId": takeId,
+      "metadata": metadata
+    ] }
 
     struct Data: MoveSingleGraphQL.SelectionSet {
       let __data: DataDict
@@ -25,7 +33,10 @@ extension MoveSingleGraphQL {
 
       static var __parentType: ApolloAPI.ParentType { MoveSingleGraphQL.Objects.Mutation }
       static var __selections: [ApolloAPI.Selection] { [
-        .field("createJob", alias: "job", Job.self, arguments: ["takeId": .variable("takeId")]),
+        .field("createJob", alias: "job", Job.self, arguments: [
+          "takeId": .variable("takeId"),
+          "metadata": .variable("metadata")
+        ]),
       ] }
 
       ///   Initialize processing a job to generate animation from a take.

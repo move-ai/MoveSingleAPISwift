@@ -23,15 +23,18 @@ public actor Job {
             }
         }
     }
+    
+    public typealias Metadata = [String: AnyHashable]
 
     @Dependency private var graphQLClient: GraphQLClient
 
     public let id: String
     public var state: Status
     public var outputFiles: [FileType: File]
+    public var metadata: Metadata?
 
     var description: String {
-        "Job(id: \(id), state: \(state), outputFiles: \(outputFiles))"
+        "Job(id: \(id), state: \(state), outputFiles: \(outputFiles)), metadata: \(metadata?.toJSONString() ?? "NA")"
     }
 
     var codable: CodableJob {
@@ -40,14 +43,15 @@ public actor Job {
             for file in outputFiles {
                 codableFiles[file.key] = await file.value.codable
             }
-            return CodableJob(id: id, state: state, outputFiles: codableFiles)
+            return CodableJob(id: id, state: state, outputFiles: codableFiles, metadata: metadata?.toJSONString())
         }
     }
 
-    public init(id: String, state: Status = .unknown, outputFiles: [FileType: File] = [:]) {
+    public init(id: String, state: Status = .unknown, outputFiles: [FileType: File] = [:], metadata: [String: AnyHashable]? = nil) {
         self.id = id
         self.state = state
         self.outputFiles = outputFiles
+        self.metadata = metadata
     }
 
     public init(from: CodableJob) {
@@ -60,6 +64,7 @@ public actor Job {
         }
 
         self.outputFiles = files
+        self.metadata = Dictionary<String, AnyHashable>.convertStringToDictionary(from.metadata)
     }
 
     public func update() async throws {
@@ -82,5 +87,6 @@ public actor Job {
         let id: String
         let state: Status
         let outputFiles: [FileType: File.CodableFile]
+        let metadata: String?
     }
 }

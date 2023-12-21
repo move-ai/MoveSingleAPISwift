@@ -115,8 +115,9 @@ public actor Take: Identifiable, Equatable {
         takeID = takeResult.id
     }
 
-    public func createJob() async throws {
-        let jobResult = try await graphQLClient.createJob(takeId: takeID)
+    public func createJob(_ metadata: Metadata? = nil) async throws {
+        let metadataJSONString = metadata?.toJSONString() ?? "{}"
+        let jobResult = try await graphQLClient.createJob(takeId: takeID, metadata: metadataJSONString)
         let job = Job(id: jobResult.id)
         jobs.append(job)
     }
