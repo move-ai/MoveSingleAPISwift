@@ -37,11 +37,11 @@ public enum GraphQLEnvironment {
 protocol GraphQLClient {
     func configure(apiKey: String, environment: GraphQLEnvironment)
     func registerForNotifications(clientID: String, events: [NotificationEvents]) async throws -> MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint
-    func createFile(type: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File
+    func createFile(type: String, metadata: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File
     func getFile(id: String) async throws -> MoveSingleGraphQL.FileQuery.Data.File
     func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take
     func getTake(id: String) async throws -> MoveSingleGraphQL.TakeQuery.Data.Take
-    func createJob(takeId: String) async throws -> MoveSingleGraphQL.CreateJobMutation.Data.Job
+    func createJob(takeId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateJobMutation.Data.Job
     func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job
     func generateShareCode(fileId: String) async throws -> MoveSingleGraphQL.GenerateShareCodeMutation.Data.ShareCode
 }
@@ -96,10 +96,10 @@ final class GraphQLClientImpl: GraphQLClient {
         }
     }
 
-    func createFile(type: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File {
+    func createFile(type: String, metadata: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File {
         return try await withCheckedThrowingContinuation { continuation in
             guard let apollo = apollo else { continuation.resume(throwing: GraphQLClientError.notConfigured); return }
-            apollo.perform(mutation: MoveSingleGraphQL.CreateFileMutation(type: type)) { result in
+            apollo.perform(mutation: MoveSingleGraphQL.CreateFileMutation(type: type, metadata: metadata)) { result in
                 switch result {
                 case .success(let result):
                     if let file = result.data?.file {
@@ -176,10 +176,10 @@ final class GraphQLClientImpl: GraphQLClient {
         }
     }
 
-    func createJob(takeId: String) async throws -> MoveSingleGraphQL.CreateJobMutation.Data.Job {
+    func createJob(takeId: String, metadata: String = "") async throws -> MoveSingleGraphQL.CreateJobMutation.Data.Job {
         return try await withCheckedThrowingContinuation { continuation in
             guard let apollo = apollo else { continuation.resume(throwing: GraphQLClientError.notConfigured); return }
-            apollo.perform(mutation: MoveSingleGraphQL.CreateJobMutation(takeId: takeId)) { result in
+            apollo.perform(mutation: MoveSingleGraphQL.CreateJobMutation(takeId: takeId, metadata: metadata)) { result in
                 switch result {
                 case .success(let result):
                     if let job = result.data?.job {

@@ -14,6 +14,8 @@ enum FileError: Error {
 }
 
 public actor File: Equatable, Hashable {
+    
+    public typealias Metadata = [String: AnyHashable]
 
     @Dependency private var graphQLClient: GraphQLClient
     @Dependency private var urlSessionClient: URLSessionClient
@@ -23,10 +25,11 @@ public actor File: Equatable, Hashable {
     public let type: FileType
     public var localFileName: String? = nil
     public var remoteID: String? = nil
+    public var metadata: Metadata?
     private let staticLocalUrl: URL?
 
     var codable: CodableFile {
-        CodableFile(id: id, type: type, localFileName: localFileName, remoteID: remoteID, staticLocalUrl: staticLocalUrl)
+        CodableFile(id: id, type: type, localFileName: localFileName, remoteID: remoteID, staticLocalUrl: staticLocalUrl, metadata: metadata?.toJSONString())
     }
 
     public var localUrl: URL? {
@@ -35,12 +38,13 @@ public actor File: Equatable, Hashable {
         return URL.documentsDirectory.appending(path: "\(fileStorage.outputDirectory)/\(localFileName).\(type.fileExtension)")
     }
 
-    public init(type: FileType, localFileName: String? = nil, remoteID: String? = nil, staticLocalUrl: URL? = nil) {
+    public init(type: FileType, localFileName: String? = nil, remoteID: String? = nil, staticLocalUrl: URL? = nil, metadata: [String: AnyHashable]? = nil) {
         self.id = UUID()
         self.type = type
         self.localFileName = localFileName
         self.remoteID = remoteID
         self.staticLocalUrl = staticLocalUrl
+        self.metadata = metadata
     }
 
     public init(from: CodableFile) {
@@ -49,11 +53,13 @@ public actor File: Equatable, Hashable {
         self.localFileName = from.localFileName
         self.remoteID = from.remoteID
         self.staticLocalUrl = from.staticLocalUrl
+        self.metadata = Dictionary<String, AnyHashable>.convertStringToDictionary(from.metadata)
     }
 
     func upload() async throws {
         guard let localUrl = localUrl else { throw FileError.localUrlMissing }
-        let fileResult = try await graphQLClient.createFile(type: type.fileExtension)
+        let metadataJSONString = metadata?.toJSONString() ?? "{}"
+        let fileResult = try await graphQLClient.createFile(type: type.fileExtension, metadata: metadataJSONString)
         guard let presignedURLString = fileResult.presignedUrl, let presignedURL = URL(string: presignedURLString) else {
             throw FileError.presignedUrlMalformed
         }
@@ -95,6 +101,7 @@ public actor File: Equatable, Hashable {
         let localFileName: String?
         let remoteID: String?
         let staticLocalUrl: URL?
+        let metadata: String?
     }
 
     public static nonisolated func == (lhs: File, rhs: File) -> Bool {

@@ -24,7 +24,7 @@ class GraphQLClientMock: GraphQLClient {
         return MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint.from(mock)
     }
 
-    func createFile(type: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File {
+    func createFile(type: String, metadata: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File {
         let mock = Mock<File>()
         mock.id = UUID().uuidString
         mock.presignedUrl = presignedUrl
@@ -52,7 +52,7 @@ class GraphQLClientMock: GraphQLClient {
         return model
     }
 
-    func createJob(takeId: String) async throws -> MoveSingleGraphQL.CreateJobMutation.Data.Job {
+    func createJob(takeId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateJobMutation.Data.Job {
         let mock = Mock<Job>()
         mock.id = UUID().uuidString
         mock.state = "NOT STARTED"

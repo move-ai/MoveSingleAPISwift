@@ -1,5 +1,5 @@
-mutation CreateJob($takeId: String!) {
-    job: createJob(takeId: $takeId) {
+mutation CreateJob($takeId: String!, $metadata: AWSJSON!) {
+    job: createJob(takeId: $takeId, metadata: $metadata) {
         id
         state
     }
