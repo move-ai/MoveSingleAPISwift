@@ -119,6 +119,7 @@ public enum FileType: String, Codable {
     case move
     case fbx
     case usdc
+    case renderOverlay
 
     public var fileExtension: String {
         switch self {
@@ -127,6 +128,7 @@ public enum FileType: String, Codable {
         case .preview: return "mp4"
         case .usdc: return "usdc"
         case .video: return "mp4"
+        case .renderOverlay: return "mp4"
         }
     }
 
@@ -134,6 +136,8 @@ public enum FileType: String, Codable {
         switch string {
         case "mp4":
             self = .preview
+        case "render_overlay_mp4":
+            self = .renderOverlay
         default:
             if let type = FileType(rawValue: string) {
                 self = type
