@@ -120,6 +120,7 @@ public enum FileType: String, Codable {
     case fbx
     case usdc
     case renderOverlay
+    case blend
 
     public var fileExtension: String {
         switch self {
@@ -129,6 +130,7 @@ public enum FileType: String, Codable {
         case .usdc: return "usdc"
         case .video: return "mp4"
         case .renderOverlay: return "mp4"
+        case .blend: return "blend"
         }
     }
 
