@@ -21,8 +21,14 @@ protocol URLSessionClient {
 
 final class URLSessionClientImpl: URLSessionClient {
 
+    lazy var session: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.tlsMinimumSupportedProtocolVersion = .TLSv12
+        return URLSession(configuration: config)
+    }()
+
     func download(url: URL, to: URL) async throws {
-        let downloadReponse = try await URLSession.shared.download(from: url)
+        let downloadReponse = try await session.download(from: url)
 
         guard let httpResponse = downloadReponse.1 as? HTTPURLResponse else {
             throw URLSessionClientError.noHTTPResponse
@@ -43,7 +49,7 @@ final class URLSessionClientImpl: URLSessionClient {
         var request = URLRequest(url: to)
         request.httpMethod = "PUT"
         request.httpBody = fileData
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await session.data(for: request)
 
         guard let response = response as? HTTPURLResponse else {
             throw URLSessionClientError.noHTTPResponse
