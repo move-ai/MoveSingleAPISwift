@@ -3,25 +3,30 @@ import os
 
 public final class Move {
 
+    private var sessionClient: URLSessionClient
     private var fileStorage: FileStorageClient
     private var graphQLClient: GraphQLClient
     private let logger = Logger()
 
     public init() {
+        sessionClient = URLSessionClientImpl()
         fileStorage = FileStorageClientImpl()
         DependencyContainer.register(fileStorage)
         graphQLClient = GraphQLClientImpl()
         DependencyContainer.register(graphQLClient)
-        DependencyContainer.register(URLSessionClientImpl() as URLSessionClient)
+        DependencyContainer.register(sessionClient)
     }
 
     public func configure(
         apiKey: String,
         environment: GraphQLEnvironment = .production,
-        outputDirectory: String = ""
+        outputDirectory: String = "",
+        graphQLCertificates: [Data]? = nil,
+        fileStorageCertificates: [Data]? = nil
     ) {
+        sessionClient.configure(certificates: fileStorageCertificates)
         fileStorage.configure(outputDirectory: outputDirectory)
-        graphQLClient.configure(apiKey: apiKey, environment: environment)
+        graphQLClient.configure(apiKey: apiKey, environment: environment, certificates: graphQLCertificates)
     }
 
     public func createTake(
@@ -51,8 +56,8 @@ public final class Move {
     }
 
     public func registerForNotifications(clientID: String, events: [NotificationEvents]) async throws {
-        let webhookEndpoint = try await graphQLClient.registerForNotifications(clientID: clientID, events: events)
-        print("\(webhookEndpoint.events ?? [])")
+//        let webhookEndpoint = try await graphQLClient.registerForNotifications(clientID: clientID, events: events)
+//        print("\(webhookEndpoint.events ?? [])")
     }
 
     

@@ -35,7 +35,7 @@ public enum GraphQLEnvironment {
 }
 
 protocol GraphQLClient {
-    func configure(apiKey: String, environment: GraphQLEnvironment)
+    func configure(apiKey: String, environment: GraphQLEnvironment, certificates: [Data]?)
     func registerForNotifications(clientID: String, events: [NotificationEvents]) async throws -> MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint
     func createFile(type: String, metadata: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File
     func getFile(id: String) async throws -> MoveSingleGraphQL.FileQuery.Data.File
@@ -47,8 +47,8 @@ protocol GraphQLClient {
 }
 
 extension GraphQLClient {
-    func configure(apiKey: String, environment: GraphQLEnvironment = .production) {
-        configure(apiKey: apiKey, environment: environment)
+    func configure(apiKey: String, environment: GraphQLEnvironment = .production, certificates: [Data]?) {
+        configure(apiKey: apiKey, environment: environment, certificates: certificates)
     }
 }
 
@@ -58,10 +58,10 @@ final class GraphQLClientImpl: GraphQLClient {
     private var apikey: String?
     private var environment: GraphQLEnvironment?
 
-    func configure(apiKey: String, environment: GraphQLEnvironment) {
+    func configure(apiKey: String, environment: GraphQLEnvironment, certificates: [Data]?) {
         self.apikey = apiKey
         self.environment = environment
-        let client = Apollo.URLSessionClient()
+        let client = SessionClient(certificates: certificates)
         let cache = InMemoryNormalizedCache()
         let store = ApolloStore(cache: cache)
         let provider = NetworkInterceptorProvider(apiKey: apiKey, client: client, store: store)
