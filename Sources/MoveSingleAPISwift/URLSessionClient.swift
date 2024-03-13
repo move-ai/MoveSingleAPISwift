@@ -15,17 +15,24 @@ enum URLSessionClientError: Error {
 }
 
 protocol URLSessionClient {
+    func configure(certificates: [Data]?)
     func download(url: URL, to: URL) async throws
     func upload(file: URL, to: URL) async throws
 }
 
-final class URLSessionClientImpl: URLSessionClient {
+final class URLSessionClientImpl: NSObject, URLSessionClient {
 
     lazy var session: URLSession = {
         let config = URLSessionConfiguration.default
         config.tlsMinimumSupportedProtocolVersion = .TLSv12
-        return URLSession(configuration: config)
+        return URLSession(configuration: config, delegate: self, delegateQueue: nil)
     }()
+
+    private var certificates: [Data]?
+
+    func configure(certificates: [Data]?) {
+        self.certificates = certificates
+    }
 
     func download(url: URL, to: URL) async throws {
         let downloadReponse = try await session.download(from: url)
@@ -67,4 +74,24 @@ final class URLSessionClientImpl: URLSessionClient {
 
     }
 
+}
+
+extension URLSessionClientImpl: URLSessionDelegate {
+    func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+
+        guard let certificates = certificates else {
+            return (.performDefaultHandling, nil)
+        }
+
+        if let trust = challenge.protectionSpace.serverTrust, SecTrustGetCertificateCount(trust) > 0 {
+            if let certificateChain = SecTrustCopyCertificateChain(trust) as? [SecCertificate],
+               let certificate = certificateChain.first {
+                let data = SecCertificateCopyData(certificate) as Data
+                if certificates.contains(data) {
+                    return (.useCredential, URLCredential(trust: trust))
+                }
+            }
+        }
+        return (.cancelAuthenticationChallenge, nil)
+    }
 }
