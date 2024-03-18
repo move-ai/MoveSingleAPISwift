@@ -20,7 +20,7 @@ public enum GraphQLEnvironment {
     var url: URL {
         switch self {
         case .green:
-            return URL(string: "https://api-test.move.ai/ugc/graphql")!
+            return URL(string: "https://api-test-new.move.ai/ugc/graphql")!
         case .production:
             return URL(string: "https://api.move.ai/ugc/graphql")!
         }
