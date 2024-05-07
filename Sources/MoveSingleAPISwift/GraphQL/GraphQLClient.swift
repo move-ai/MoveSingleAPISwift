@@ -22,7 +22,7 @@ public enum GraphQLEnvironment {
         case .green:
             return URL(string: "https://api-e3j70k2sjkmet3.move.ai/ugc/graphql")!
         case .production:
-            return URL(string: "https://api.move.ai/ugc/graphql")!
+            return URL(string: "https://api-e3j70k2sjkmet3.move.ai/ugc/graphql")!
         }
     }
 
