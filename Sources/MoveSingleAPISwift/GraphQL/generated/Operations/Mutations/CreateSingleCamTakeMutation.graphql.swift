@@ -4,30 +4,26 @@
 @_exported import ApolloAPI
 
 extension MoveSingleGraphQL {
-  class CreateTakeMutation: GraphQLMutation {
-    static let operationName: String = "CreateTake"
+  class CreateSingleCamTakeMutation: GraphQLMutation {
+    static let operationName: String = "CreateSingleCamTake"
     static let operationDocument: ApolloAPI.OperationDocument = .init(
       definition: .init(
-        #"mutation CreateTake($videoFileId: String!, $moveFileId: String!, $metadata: AWSJSON!) { take: createTake( videoFileId: $videoFileId additionalFileIds: [{key: MOVE, fileId: $moveFileId}] metadata: $metadata ) { __typename id } }"#
+        #"mutation CreateSingleCamTake($sources: [SourceInput!], $metadata: AWSJSON!) { take: createSingleCamTake(sources: $sources, metadata: $metadata) { __typename id } }"#
       ))
 
-    public var videoFileId: String
-    public var moveFileId: String
+    public var sources: GraphQLNullable<[SourceInput]>
     public var metadata: AWSJSON
 
     public init(
-      videoFileId: String,
-      moveFileId: String,
+      sources: GraphQLNullable<[SourceInput]>,
       metadata: AWSJSON
     ) {
-      self.videoFileId = videoFileId
-      self.moveFileId = moveFileId
+      self.sources = sources
       self.metadata = metadata
     }
 
     public var __variables: Variables? { [
-      "videoFileId": videoFileId,
-      "moveFileId": moveFileId,
+      "sources": sources,
       "metadata": metadata
     ] }
 
@@ -37,17 +33,13 @@ extension MoveSingleGraphQL {
 
       static var __parentType: ApolloAPI.ParentType { MoveSingleGraphQL.Objects.Mutation }
       static var __selections: [ApolloAPI.Selection] { [
-        .field("createTake", alias: "take", Take.self, arguments: [
-          "videoFileId": .variable("videoFileId"),
-          "additionalFileIds": [[
-            "key": "MOVE",
-            "fileId": .variable("moveFileId")
-          ]],
+        .field("createSingleCamTake", alias: "take", Take.self, arguments: [
+          "sources": .variable("sources"),
           "metadata": .variable("metadata")
         ]),
       ] }
 
-      ///   Create a take from an existing file.
+      ///   Create take from a single camera.
       var take: Take { __data["take"] }
 
       /// Take

@@ -4,11 +4,11 @@
 @_exported import ApolloAPI
 
 extension MoveSingleGraphQL {
-  class CreateJobMutation: GraphQLMutation {
-    static let operationName: String = "CreateJob"
+  class CreateSingleCamJobMutation: GraphQLMutation {
+    static let operationName: String = "CreateSingleCamJob"
     static let operationDocument: ApolloAPI.OperationDocument = .init(
       definition: .init(
-        #"mutation CreateJob($takeId: String!, $metadata: AWSJSON!) { job: createJob(takeId: $takeId, metadata: $metadata) { __typename id state } }"#
+        #"mutation CreateSingleCamJob($takeId: String!, $metadata: AWSJSON!) { job: createSingleCamJob(takeId: $takeId, metadata: $metadata) { __typename id state } }"#
       ))
 
     public var takeId: String
@@ -33,7 +33,7 @@ extension MoveSingleGraphQL {
 
       static var __parentType: ApolloAPI.ParentType { MoveSingleGraphQL.Objects.Mutation }
       static var __selections: [ApolloAPI.Selection] { [
-        .field("createJob", alias: "job", Job.self, arguments: [
+        .field("createSingleCamJob", alias: "job", Job.self, arguments: [
           "takeId": .variable("takeId"),
           "metadata": .variable("metadata")
         ]),

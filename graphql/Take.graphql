@@ -1,12 +1,6 @@
-mutation CreateTake($videoFileId: String!, $moveFileId: String!, $metadata: AWSJSON!) {
-    take: createTake(
-        videoFileId: $videoFileId
-        additionalFileIds: [
-            {
-                key: MOVE,
-                fileId: $moveFileId
-            }
-        ]
+mutation CreateSingleCamTake($sources: [SourceInput!], $metadata: AWSJSON!) {
+    take: createSingleCamTake(
+        sources: $sources,
         metadata: $metadata
     ) {
         id

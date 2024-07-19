@@ -21,12 +21,13 @@ public final class Move {
         apiKey: String,
         environment: GraphQLEnvironment = .production,
         outputDirectory: String = "",
+        deviceLabel: String,
         graphQLCertificates: [Data]? = nil,
         fileStorageCertificates: [Data]? = nil
     ) {
         sessionClient.configure(certificates: fileStorageCertificates)
         fileStorage.configure(outputDirectory: outputDirectory)
-        graphQLClient.configure(apiKey: apiKey, environment: environment, certificates: graphQLCertificates)
+        graphQLClient.configure(apiKey: apiKey, environment: environment, certificates: graphQLCertificates, deviceLabel: deviceLabel)
     }
 
     public func createTake(
