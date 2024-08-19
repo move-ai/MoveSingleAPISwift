@@ -35,20 +35,20 @@ public enum GraphQLEnvironment {
 }
 
 protocol GraphQLClient {
-    func configure(apiKey: String, environment: GraphQLEnvironment, certificates: [Data]?)
+    func configure(apiKey: String, environment: GraphQLEnvironment, certificates: [Data]?, deviceLabel: String)
     func registerForNotifications(clientID: String, events: [NotificationEvents]) async throws -> MoveSingleGraphQL.WebhookEndpointMutation.Data.UpsertWebhookEndpoint
     func createFile(type: String, metadata: String) async throws -> MoveSingleGraphQL.CreateFileMutation.Data.File
     func getFile(id: String) async throws -> MoveSingleGraphQL.FileQuery.Data.File
-    func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take
+    func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateSingleCamTakeMutation.Data.Take
     func getTake(id: String) async throws -> MoveSingleGraphQL.TakeQuery.Data.Take
-    func createJob(takeId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateJobMutation.Data.Job
+    func createJob(takeId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateSingleCamJobMutation.Data.Job
     func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job
     func generateShareCode(fileId: String) async throws -> MoveSingleGraphQL.GenerateShareCodeMutation.Data.ShareCode
 }
 
 extension GraphQLClient {
-    func configure(apiKey: String, environment: GraphQLEnvironment = .production, certificates: [Data]?) {
-        configure(apiKey: apiKey, environment: environment, certificates: certificates)
+    func configure(apiKey: String, environment: GraphQLEnvironment = .production, certificates: [Data]?, deviceLabel: String) {
+        configure(apiKey: apiKey, environment: environment, certificates: certificates, deviceLabel: deviceLabel)
     }
 }
 
@@ -57,10 +57,12 @@ final class GraphQLClientImpl: GraphQLClient {
     private var apollo: ApolloClient?
     private var apikey: String?
     private var environment: GraphQLEnvironment?
+    private var deviceLabel: String?
 
-    func configure(apiKey: String, environment: GraphQLEnvironment, certificates: [Data]?) {
+    func configure(apiKey: String, environment: GraphQLEnvironment, certificates: [Data]?, deviceLabel: String) {
         self.apikey = apiKey
         self.environment = environment
+        self.deviceLabel = deviceLabel
         let client = SessionClient(certificates: certificates)
         let cache = InMemoryNormalizedCache()
         let store = ApolloStore(cache: cache)
@@ -136,10 +138,16 @@ final class GraphQLClientImpl: GraphQLClient {
         }
     }
 
-    func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take {
+    func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateSingleCamTakeMutation.Data.Take {
         return try await withCheckedThrowingContinuation { continuation in
             guard let apollo = apollo else { continuation.resume(throwing: GraphQLClientError.notConfigured); return }
-            apollo.perform(mutation: MoveSingleGraphQL.CreateTakeMutation(videoFileId: videoFileId, moveFileId: moveFileId, metadata: metadata)) { result in
+            
+            let sources: [MoveSingleGraphQL.SourceInput]? = [
+                MoveSingleGraphQL.SourceInput(deviceLabel: deviceLabel ?? "", fileId: videoFileId, format: .case(.mp4)),
+                MoveSingleGraphQL.SourceInput(deviceLabel: deviceLabel ?? "", fileId: moveFileId, format: .case(.move))
+            ]
+
+            apollo.perform(mutation: MoveSingleGraphQL.CreateSingleCamTakeMutation(sources: sources.gqlWrapped, metadata: metadata)) { result in
                 switch result {
                 case .success(let result):
                     if let take = result.data?.take {
@@ -176,10 +184,10 @@ final class GraphQLClientImpl: GraphQLClient {
         }
     }
 
-    func createJob(takeId: String, metadata: String = "") async throws -> MoveSingleGraphQL.CreateJobMutation.Data.Job {
+    func createJob(takeId: String, metadata: String = "") async throws -> MoveSingleGraphQL.CreateSingleCamJobMutation.Data.Job {
         return try await withCheckedThrowingContinuation { continuation in
             guard let apollo = apollo else { continuation.resume(throwing: GraphQLClientError.notConfigured); return }
-            apollo.perform(mutation: MoveSingleGraphQL.CreateJobMutation(takeId: takeId, metadata: metadata)) { result in
+            apollo.perform(mutation: MoveSingleGraphQL.CreateSingleCamJobMutation(takeId: takeId, metadata: metadata)) { result in
                 switch result {
                 case .success(let result):
                     if let job = result.data?.job {

@@ -60,12 +60,12 @@ extension MoveSingleGraphQL {
           static var __parentType: ApolloAPI.ParentType { MoveSingleGraphQL.Objects.AdditionalFile }
           static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
-            .field("key", String.self),
+            .field("key", String?.self),
             .field("file", File.self),
           ] }
 
           ///   Type of additional file
-          var key: String { __data["key"] }
+          var key: String? { __data["key"] }
           ///   Reference to the additional file object
           var file: File { __data["file"] }
 

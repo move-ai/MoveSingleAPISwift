@@ -73,8 +73,8 @@ public actor Job {
         if state == .finished {
             var files: [FileType: File] = [:]
             for output in jobResult.outputs ?? [] {
-                if let output = output,
-                   let type = FileType(from: output.key) {
+                if let output = output, let key = output.key,
+                   let type = FileType(from: key) {
                     let file = File(type: type, remoteID: output.file.id)
                     files[type] = file
                 }

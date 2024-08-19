@@ -39,10 +39,10 @@ class GraphQLClientMock: GraphQLClient {
         return model
     }
 
-    func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateTakeMutation.Data.Take {
+    func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateSingleCamTakeMutation.Data.Take {
         let mock = Mock<Take>()
         mock.id = UUID().uuidString
-        let model = MoveSingleGraphQL.CreateTakeMutation.Data.Take.from(mock)
+        let model = MoveSingleGraphQL.CreateSingleCamTakeMutation.Data.Take.from(mock)
         return model
     }
 
@@ -52,11 +52,11 @@ class GraphQLClientMock: GraphQLClient {
         return model
     }
 
-    func createJob(takeId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateJobMutation.Data.Job {
+    func createJob(takeId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateSingleCamJobMutation.Data.Job {
         let mock = Mock<Job>()
         mock.id = UUID().uuidString
         mock.state = "NOT STARTED"
-        let model = MoveSingleGraphQL.CreateJobMutation.Data.Job.from(mock)
+        let model = MoveSingleGraphQL.CreateSingleCamJobMutation.Data.Job.from(mock)
         return model
     }
     
