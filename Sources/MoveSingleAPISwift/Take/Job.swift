@@ -6,6 +6,43 @@
 //
 
 import Foundation
+import Apollo
+
+extension GraphQLError {
+    func asJobError() -> JobError? {
+        JobError(code: self["errorType"] as? String ?? "",
+                 message: self.message ?? "",
+                 suggestions: (self["errorInfo"] as? [String: Any])?["suggestions"]  as? [String] ?? [],
+                 takeID: ((self["errorInfo"] as? [String: Any])?["data"] as? [String: Any])?["takeId"] as? String ?? "",
+                 jobID: ((self["errorInfo"] as? [String: Any])?["data"] as? [String: Any])?["id"] as? String ?? "",
+                 tenantID: ((self["errorInfo"] as? [String: Any])?["data"] as? [String: Any])?["tenant_id"] as? String ?? "",
+                 clientID: ((self["errorInfo"] as? [String: Any])?["data"] as? [String: Any])?["client_id"] as? String ?? "")
+
+    }
+}
+
+public struct JobError: Equatable, Hashable, Identifiable {
+    public var id: String {
+        code
+    }
+    
+    public var code: String
+    public var message: String
+    public var suggestions: [String]
+
+    public var takeID: String
+    public var jobID: String
+    public var tenantID: String
+    public var clientID: String
+
+    static let sample = JobError(code: "MV_060_240_0999",
+                                 message: "The engine hasn't been able to identify an actor",
+                                 suggestions: ["Please check one actor is fully visible in the video."],
+                                 takeID: "take-c46f559f-83ad-4780-9354-213d65895365",
+                                 jobID: "job-2f56d0aa-879c-446c-9ee0-dec36d4bdbda",
+                                 tenantID: "tenant_19aac7a1-7fe9-45cf-aca6-c3ab9cec5a29",
+                                 clientID: "client-2ef39418-2236-40a8-92dc-d4fc95622e68")
+}
 
 public actor Job {
     public enum Status: String, Codable {
@@ -32,7 +69,7 @@ public actor Job {
     public var state: Status
     public var outputFiles: [FileType: File]
     public var metadata: Metadata?
-
+    public var errors: [JobError] = []
     var description: String {
         "Job(id: \(id), state: \(state), outputFiles: \(outputFiles)), metadata: \(metadata?.toJSONString() ?? "NA")"
     }
@@ -68,8 +105,12 @@ public actor Job {
     }
 
     public func update() async throws {
-        let jobResult = try await graphQLClient.getJob(id: id)
+        //let jobResult = try await graphQLClient.getJob(id: id)
+        let jobResultPair = try await graphQLClient.getJob(id: id)
+        let jobResult = jobResultPair.0
+        let jobErrors = jobResultPair.1
         state = Status(from: jobResult.state)
+        errors = jobErrors?.compactMap { $0.asJobError() } ?? []
         if state == .finished {
             var files: [FileType: File] = [:]
             for output in jobResult.outputs ?? [] {

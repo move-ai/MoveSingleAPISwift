@@ -42,7 +42,8 @@ protocol GraphQLClient {
     func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateSingleCamTakeMutation.Data.Take
     func getTake(id: String) async throws -> MoveSingleGraphQL.TakeQuery.Data.Take
     func createJob(takeId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateSingleCamJobMutation.Data.Job
-    func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job
+    //func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job
+    func getJob(id: String) async throws -> (MoveSingleGraphQL.JobQuery.Data.Job, [GraphQLError]?)
     func generateShareCode(fileId: String) async throws -> MoveSingleGraphQL.GenerateShareCodeMutation.Data.ShareCode
 }
 
@@ -204,7 +205,8 @@ final class GraphQLClientImpl: GraphQLClient {
         }
     }
 
-    func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job {
+    //func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job {
+    func getJob(id: String) async throws -> (MoveSingleGraphQL.JobQuery.Data.Job, [GraphQLError]?) { //MoveSingleGraphQL.JobQuery.Data.Job {
         return try await withCheckedThrowingContinuation { continuation in
             guard let apollo = apollo else { continuation.resume(throwing: GraphQLClientError.notConfigured); return }
             apollo.fetch(query: MoveSingleGraphQL.JobQuery(jobId: id), cachePolicy: .fetchIgnoringCacheCompletely) { result in
@@ -212,7 +214,8 @@ final class GraphQLClientImpl: GraphQLClient {
                 case .success(let result):
                     print(result.source)
                     if let job = result.data?.job {
-                        continuation.resume(returning: job)
+                        //continuation.resume(returning: job)
+                        continuation.resume(returning: (job, result.errors))
                     } else if let error = result.errors?.first {
                         continuation.resume(throwing: error)
                     } else {
