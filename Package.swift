@@ -18,8 +18,8 @@ let package = Package(
             url: "https://github.com/apollographql/apollo-ios.git",
             exact: "1.9.3"
         ),
-        .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.22.1"),
-        .package(url: "https://github.com/marmelroy/Zip.git", from: "2.1.0")
+        .package(url: "https://github.com/apple/swift-protobuf.git", exact: "1.28.2"),
+        .package(url: "https://github.com/marmelroy/Zip.git", exact: "2.1.2")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
