@@ -1,5 +1,5 @@
-mutation CreateSingleCamJob($takeId: String!, $metadata: AWSJSON!) {
-    job: createSingleCamJob(takeId: $takeId, metadata: $metadata) {
+mutation CreateSingleCamJob($takeId: String!, $metadata: AWSJSON!, $options: OptionsInput) {
+    job: createSingleCamJob(takeId: $takeId, metadata: $metadata, options: $options) {
         id
         state
     }
@@ -16,4 +16,12 @@ query Job($jobId: ID!) {
             }
         }
     }
+}
+
+query Thing{
+  __type(name: "MocapModelOptionsInput") {
+    enumValues {
+      name
+    }
+  }
 }

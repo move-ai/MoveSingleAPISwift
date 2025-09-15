@@ -14,14 +14,12 @@ extension MoveSingleGraphQL {
 
     init(
       cameraSettings: GraphQLNullable<CameraSettingsInput> = nil,
-      clipWindow: GraphQLNullable<ClipWindowInput> = nil,
       deviceLabel: String,
       fileId: String,
       format: GraphQLEnum<SourceFormat>
     ) {
       __data = InputDict([
         "cameraSettings": cameraSettings,
-        "clipWindow": clipWindow,
         "deviceLabel": deviceLabel,
         "fileId": fileId,
         "format": format
@@ -32,12 +30,6 @@ extension MoveSingleGraphQL {
     var cameraSettings: GraphQLNullable<CameraSettingsInput> {
       get { __data["cameraSettings"] }
       set { __data["cameraSettings"] = newValue }
-    }
-
-    ///   The clip window that should be processed. If not provided the entire source will be processed.
-    var clipWindow: GraphQLNullable<ClipWindowInput> {
-      get { __data["clipWindow"] }
-      set { __data["clipWindow"] = newValue }
     }
 
     ///   A user defined label for the device this source input was captured on.

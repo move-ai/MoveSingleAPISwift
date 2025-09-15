@@ -42,7 +42,7 @@
       },
       "downloadTimeout": 60,
       "headers": {
-          "Authorization": ""
+          "Authorization": "mv_key_55d1037e-87f3-4f92-ab0b-1e9cd81daced"
       },
       "outputPath": "./graphql/schema.json"
   }

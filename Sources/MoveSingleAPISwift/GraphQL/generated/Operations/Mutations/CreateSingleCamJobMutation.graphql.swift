@@ -8,23 +8,27 @@ extension MoveSingleGraphQL {
     static let operationName: String = "CreateSingleCamJob"
     static let operationDocument: ApolloAPI.OperationDocument = .init(
       definition: .init(
-        #"mutation CreateSingleCamJob($takeId: String!, $metadata: AWSJSON!) { job: createSingleCamJob(takeId: $takeId, metadata: $metadata) { __typename id state } }"#
+        #"mutation CreateSingleCamJob($takeId: String!, $metadata: AWSJSON!, $options: OptionsInput) { job: createSingleCamJob(takeId: $takeId, metadata: $metadata, options: $options) { __typename id state } }"#
       ))
 
     public var takeId: String
     public var metadata: AWSJSON
+    public var options: GraphQLNullable<OptionsInput>
 
     public init(
       takeId: String,
-      metadata: AWSJSON
+      metadata: AWSJSON,
+      options: GraphQLNullable<OptionsInput>
     ) {
       self.takeId = takeId
       self.metadata = metadata
+      self.options = options
     }
 
     public var __variables: Variables? { [
       "takeId": takeId,
-      "metadata": metadata
+      "metadata": metadata,
+      "options": options
     ] }
 
     struct Data: MoveSingleGraphQL.SelectionSet {
@@ -35,7 +39,8 @@ extension MoveSingleGraphQL {
       static var __selections: [ApolloAPI.Selection] { [
         .field("createSingleCamJob", alias: "job", Job.self, arguments: [
           "takeId": .variable("takeId"),
-          "metadata": .variable("metadata")
+          "metadata": .variable("metadata"),
+          "options": .variable("options")
         ]),
       ] }
 

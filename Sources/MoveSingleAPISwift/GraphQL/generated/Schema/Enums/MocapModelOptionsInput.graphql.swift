@@ -4,11 +4,9 @@
 import ApolloAPI
 
 extension MoveSingleGraphQL {
-  enum SourceFormat: String, EnumType {
-    case avi = "AVI"
-    case mov = "MOV"
-    case move = "MOVE"
-    case mp4 = "MP4"
+  enum MocapModelOptionsInput: String, EnumType {
+    case s1 = "S1"
+    case s2 = "S2"
   }
 
 }

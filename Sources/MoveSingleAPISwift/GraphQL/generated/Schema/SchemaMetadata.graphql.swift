@@ -39,6 +39,8 @@ extension MoveSingleGraphQL {
       case "ShareCode": return MoveSingleGraphQL.Objects.ShareCode
       case "Query": return MoveSingleGraphQL.Objects.Query
       case "AdditionalFile": return MoveSingleGraphQL.Objects.AdditionalFile
+      case "__Type": return MoveSingleGraphQL.Objects.__Type
+      case "__EnumValue": return MoveSingleGraphQL.Objects.__EnumValue
       case "WebhookEndpoint": return MoveSingleGraphQL.Objects.WebhookEndpoint
       default: return nil
       }

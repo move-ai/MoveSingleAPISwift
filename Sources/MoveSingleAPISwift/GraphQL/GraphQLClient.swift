@@ -55,6 +55,20 @@ extension GraphQLClient {
 
 final class GraphQLClientImpl: GraphQLClient {
 
+    func getThing()  {
+        guard let apollo = apollo else {
+            return
+        }
+            apollo.fetch(query: MoveSingleGraphQL.ThingQuery()) { result in
+                switch result {
+                case .success(let result):
+                    print(result)
+                case .failure(let error):
+                    print(error)
+                }
+            }
+    }
+
     private var apollo: ApolloClient?
     private var apikey: String?
     private var environment: GraphQLEnvironment?
