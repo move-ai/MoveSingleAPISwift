@@ -17,6 +17,10 @@ public final class Move {
         DependencyContainer.register(sessionClient)
     }
 
+    public func getEnums() async throws -> [String]{
+        let enums = try await graphQLClient.getEnums()
+        return enums
+    }
     public func configure(
         apiKey: String,
         environment: GraphQLEnvironment = .production,

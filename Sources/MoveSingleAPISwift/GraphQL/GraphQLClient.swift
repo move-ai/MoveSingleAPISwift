@@ -12,6 +12,25 @@ enum GraphQLClientError: Error {
     case noDataFound
     case notConfigured
 }
+public struct GraphQLHelper {
+
+    @available(*, unavailable)
+    init() {}
+
+    /// Wraps a value inside a `GraphQLNullable` object. Use when a GraphQL property expects
+    /// a `GraphQLNullable` type.
+    ///
+    /// - parameter value: The object to wrap
+    ///
+    /// - returns: a `GraphQLNullable` object
+    static public func graphQLNullableFrom<T>(_ value: T?) -> GraphQLNullable<T> {
+        if let val = value {
+            return .some(val)
+        }
+
+        return .none
+    }
+}
 
 public enum GraphQLEnvironment {
     case green
@@ -41,9 +60,10 @@ protocol GraphQLClient {
     func getFile(id: String) async throws -> MoveSingleGraphQL.FileQuery.Data.File
     func createTake(videoFileId: String, moveFileId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateSingleCamTakeMutation.Data.Take
     func getTake(id: String) async throws -> MoveSingleGraphQL.TakeQuery.Data.Take
-    func createJob(takeId: String, metadata: String) async throws -> MoveSingleGraphQL.CreateSingleCamJobMutation.Data.Job
-    func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job
+    func createJob(takeId: String, metadata: String, mocapModel: String?) async throws -> MoveSingleGraphQL.CreateSingleCamJobMutation.Data.Job
+    func getJob(id: String) async throws -> (MoveSingleGraphQL.JobQuery.Data.Job, [GraphQLError]?)
     func generateShareCode(fileId: String) async throws -> MoveSingleGraphQL.GenerateShareCodeMutation.Data.ShareCode
+    func getEnums() async throws -> [String] // MoveSingleGraphQL.EnumsQuery.Data
 }
 
 extension GraphQLClient {
@@ -118,6 +138,29 @@ final class GraphQLClientImpl: GraphQLClient {
         }
     }
 
+    func getEnums() async throws -> [String] { //MoveSingleGraphQL.EnumsQuery.Data
+        return try await withCheckedThrowingContinuation { continuation in
+            guard let apollo = apollo else { continuation.resume(throwing: GraphQLClientError.notConfigured); return }
+            apollo.fetch(query: MoveSingleGraphQL.EnumsQuery(), cachePolicy: .fetchIgnoringCacheCompletely) { result in
+                switch result {
+                case .success(let result):
+                    if let data = result.data {
+                        let enums: [String] = data.__type?.enumValues?.flatMap{ $0.name }.filter{ $0.first == "S" } ?? []
+                        print("Enums: \(enums)")
+                        continuation.resume(returning: enums)
+                    } else if let error = result.errors?.first {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume(throwing: GraphQLClientError.noDataFound)
+                    }
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    
+
     func getFile(id: String) async throws -> MoveSingleGraphQL.FileQuery.Data.File {
         return try await withCheckedThrowingContinuation { continuation in
             guard let apollo = apollo else { continuation.resume(throwing: GraphQLClientError.notConfigured); return }
@@ -184,10 +227,19 @@ final class GraphQLClientImpl: GraphQLClient {
         }
     }
 
-    func createJob(takeId: String, metadata: String = "") async throws -> MoveSingleGraphQL.CreateSingleCamJobMutation.Data.Job {
+    func createJob(takeId: String, metadata: String = "", mocapModel: String?) async throws -> MoveSingleGraphQL.CreateSingleCamJobMutation.Data.Job {
         return try await withCheckedThrowingContinuation { continuation in
             guard let apollo = apollo else { continuation.resume(throwing: GraphQLClientError.notConfigured); return }
-            apollo.perform(mutation: MoveSingleGraphQL.CreateSingleCamJobMutation(takeId: takeId, metadata: metadata)) { result in
+            
+            var options: MoveSingleGraphQL.OptionsInput
+            if mocapModel != nil && !mocapModel!.isEmpty  {
+                options = .init(mocapModel: GraphQLHelper.graphQLNullableFrom(mocapModel))
+            } else {
+                options = .init(mocapModel: GraphQLHelper.graphQLNullableFrom(nil))
+            }
+
+            let mutation = MoveSingleGraphQL.CreateSingleCamJobMutation(takeId: takeId, metadata: metadata, options: options)
+            apollo.perform(mutation: mutation) { result in
                 switch result {
                 case .success(let result):
                     if let job = result.data?.job {
@@ -204,7 +256,8 @@ final class GraphQLClientImpl: GraphQLClient {
         }
     }
 
-    func getJob(id: String) async throws -> MoveSingleGraphQL.JobQuery.Data.Job {
+    // here
+    func getJob(id: String) async throws -> (MoveSingleGraphQL.JobQuery.Data.Job, [GraphQLError]?) { //MoveSingleGraphQL.JobQuery.Data.Job {
         return try await withCheckedThrowingContinuation { continuation in
             guard let apollo = apollo else { continuation.resume(throwing: GraphQLClientError.notConfigured); return }
             apollo.fetch(query: MoveSingleGraphQL.JobQuery(jobId: id), cachePolicy: .fetchIgnoringCacheCompletely) { result in
@@ -212,7 +265,7 @@ final class GraphQLClientImpl: GraphQLClient {
                 case .success(let result):
                     print(result.source)
                     if let job = result.data?.job {
-                        continuation.resume(returning: job)
+                        continuation.resume(returning: (job, result.errors))
                     } else if let error = result.errors?.first {
                         continuation.resume(throwing: error)
                     } else {

@@ -8,5 +8,11 @@ extension MoveSingleGraphQL {
     case move = "MOVE"
     case mp4 = "MP4"
   }
+}
 
+extension MoveSingleGraphQL {
+  enum MocapModelOptionsInput: String, EnumType {
+    case s1 = "S1"
+    case s2 = "S2"
+  }
 }
