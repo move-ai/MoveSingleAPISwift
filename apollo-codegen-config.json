@@ -5,7 +5,7 @@
       "**/*.graphql"
     ],
     "schemaSearchPaths" : [
-      "graphql/*.json"
+      "**/*.graphqls"
     ]
   },
   "output" : {
@@ -44,6 +44,6 @@
       "headers": {
           "Authorization": ""
       },
-      "outputPath": "./graphql/schema.json"
+      "outputPath": "./graphql/schema.graphqls"
   }
 }

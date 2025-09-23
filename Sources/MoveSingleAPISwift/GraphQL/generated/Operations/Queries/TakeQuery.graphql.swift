@@ -28,7 +28,7 @@ extension MoveSingleGraphQL {
         .field("getTake", alias: "take", Take.self, arguments: ["takeId": .variable("takeId")]),
       ] }
 
-      ///   Get a take with given id.
+      ///   Get a take with give id.
       var take: Take { __data["take"] }
 
       /// Take
